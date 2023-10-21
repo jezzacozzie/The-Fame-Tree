@@ -17,10 +17,13 @@ addLayer("f", {
         mult = new Decimal(1)
         if (hasUpgrade ('f', 13)) mult = mult.times(upgradeEffect('f', 13))
         if (hasUpgrade ('f', 15)) mult = mult.times(upgradeEffect('f', 15))
+        if (hasUpgrade ('f', 22)) mult = mult.times(1.1)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
-        return new Decimal(1)
+        exp = new Decimal(1)
+        if (hasUpgrade ('f', 24)) exp = exp.times(1.01)
+        return exp
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
@@ -41,7 +44,9 @@ addLayer("f", {
         description: "Multiply popularity gain by fame.",
         cost: new Decimal(1),
         effect() {
-            return player[this.layer].points.add(1).pow(0.3)
+            let eff = player.f.points.add(1).pow(0.3)
+            if (hasUpgrade('f', 23)) eff = eff.add(upgradeEffect('f', 23))
+            return eff
         },
         effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
         unlocked() {
@@ -63,7 +68,7 @@ addLayer("f", {
     14: {
         title: "Exponential",
         description: "Multiply popularity generation by popularity.",
-        cost: new Decimal(3),
+        cost: new Decimal(2),
         effect() {
             return player.points.add(1).pow(0.15)
         },
@@ -75,15 +80,65 @@ addLayer("f", {
     15: {
         title: "Fame^2",
         description: "Multiply fame gain by fame.",
-        cost: new Decimal(5),
+        cost: new Decimal(3),
         effect() {
-            return player[this.layer].points.add(1).pow(0.03)
+            let eff = player.f.points.add(1).pow(0.03)
+            if (hasUpgrade('f', 25)) eff = eff.add(upgradeEffect('f', 25))
+            return eff
         },
         effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
         unlocked() {
             return hasUpgrade ('f', 14)
             },
     },
+    21: {
+        title: "Post-Existence",
+        description: "Add an extra 0.1 to popularity gain base.",
+        cost: new Decimal(4),
+        unlocked() {
+            return hasUpgrade ('f', 15)
+        },
+    },
+    22: {
+        title: "Extra Fame",
+        description: "Gain 10% more fame.",
+        cost: new Decimal(6),
+        unlocked() {
+            return hasUpgrade ('f', 21)
+        },
+    },
+    23: {
+        title: "More Growth",
+        description: "Increase 'Growth' effect by popularity.",
+        cost: new Decimal(8),
+        effect() {
+            return player.points.add(1).pow(0.1)
+        },
+        effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
+        unlocked() {
+            return hasUpgrade ('f', 22)
+        }
+    },
+    24: {
+        title: "1/100th Superstar",
+        description: "Add 0.01 to fame gain exponent.",
+        cost: new Decimal(12),
+        unlocked() {
+            return hasUpgrade ('f', 23)
+        },
+    },
+    25: {
+        title: "Fame^3",
+        description: "Increase 'Fame^2' effect by fame.",
+        cost: new Decimal(20),
+        effect() {
+            return player.f.points.add(1).pow(0.1)
+        },
+        effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
+        unlocked() {
+            return hasUpgrade ('f', 24)
+        }
+    }
 },
 
 })
@@ -101,19 +156,19 @@ addLayer("a", {
 
    achievements: {
     rows: 20,
-    columns: 5,
+    columns: 4,
     11: {
         name: "Somebody Knows Me!",
         tooltip: "Start generation of popularity.",
         done() {
-            return hasUpgrade ('f', 11) 
+            return hasUpgrade ('f', 11)
         },
     },
     12: {
         name: "Is this good enough?",
-        tooltip: "Have 20 popularity at any one time.",
+        tooltip: "Have 3 popularity at any one time.",
         done() {
-            return player.points.gte(20)
+            return player.points.gte(3)
         },
     },
     13: {
@@ -123,6 +178,13 @@ addLayer("a", {
             return player.f.points.gte(5)
         },
     },
+    14: {
+        name: "Berry Famous",
+        tooltip: "Have all of the fame upgrades.",
+        done() {
+            return hasUpgrade('f', 25)
+        }
+    }
     },
    },
 )

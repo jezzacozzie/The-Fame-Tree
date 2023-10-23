@@ -18,6 +18,8 @@ addLayer("f", {
         if (hasUpgrade ('f', 13)) mult = mult.times(upgradeEffect('f', 13))
         if (hasUpgrade ('f', 15)) mult = mult.times(upgradeEffect('f', 15))
         if (hasUpgrade ('f', 22)) mult = mult.times(1.1)
+        if (hasUpgrade ('v', 11)) mult = mult.times(upgradeEffect('v', 11))
+        if (hasUpgrade ('v', 13)) mult = mult.pow(1.05)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -30,6 +32,11 @@ addLayer("f", {
         {key: "f", description: "F: Reset for fame.", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){return true},    
+    doReset(resettingLayer) {
+        let keep = [];
+        if (hasMilestone ('v', 0) && resettingLayer=="v") keep.push("upgrades")
+        if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
+    },
 
     upgrades: {
         rows: 2,
@@ -46,6 +53,7 @@ addLayer("f", {
         effect() {
             let eff = player.f.points.add(1).pow(0.3)
             if (hasUpgrade('f', 23)) eff = eff.add(upgradeEffect('f', 23))
+            if (hasUpgrade('v', 13)) eff = eff.add(upgradeEffect('v', 13))
             return eff
         },
         effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
@@ -70,7 +78,9 @@ addLayer("f", {
         description: "Multiply popularity generation by popularity.",
         cost: new Decimal(2),
         effect() {
-            return player.points.add(1).pow(0.15)
+            let eff = player.points.add(1).pow(0.15)
+            if (hasUpgrade ('v', 12)) eff = eff.add(2)
+            return eff
         },
         effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
         unlocked() {
@@ -143,6 +153,139 @@ addLayer("f", {
 
 })
 
+addLayer("v", {
+    name: "viewers", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "V", // This appears on the layer's node. Default is the id with the first letter capitalized
+    position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    startData() { return {
+        unlocked: false,
+		points: new Decimal(0),
+        best: new Decimal(0),
+        total: new Decimal(0),
+    }},
+    color: "#6450D4",
+    requires: new Decimal(25), // Can be a function that takes requirement increases into account
+    resource: "viewers", // Name of prestige currency
+    baseResource: "popularity", // Name of resource prestige is based on
+    baseAmount() {return player.points}, // Get the current amount of baseResource
+    type: "static", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+        branches: ["f"],
+    exponent: 1.5, // Prestige currency exponent
+    gainMult() { // Calculate the multiplier for main currency from bonuses
+        mult = new Decimal(1)
+        return mult
+    },
+    gainExp() { // Calculate the exponent on main currency from bonuses
+        exp = new Decimal(1)
+        return exp
+    },
+    row: 1, // Row the layer is in on the tree (0 is the first row)
+    hotkeys: [
+        {key: "v", description: "V: Reset for viewers.", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+    ],
+    layerShown(){return hasAchievement ('a', 14)}, 
+    effect() {
+        let eff = player.v.points.add(1)
+        eff = eff.times(tmp.v.buyables[11].effect)
+        return eff
+    },
+    effectDescription() {
+        dis = "which boost popularity gain by "+format(tmp.v.effect)+"x"
+        return dis
+    },
+    effectBase() {
+        let base = new Decimal(1)
+    },
+
+    tabFormat: {
+        "Main": {
+        content:[
+            "main-display",
+            "prestige-button",
+            "blank",
+            "upgrades",
+        ]
+        },
+        "Milestones": {
+        content:[
+            "main-display",
+            "prestige-button",
+            "blank",
+            "milestones",
+        ]
+        },
+        "Buyables": {
+        content:[
+            "main-display",
+            "prestige-button",
+            "blank",
+            "buyables",
+        ]
+        }
+    },
+
+    upgrades:{
+        11: {
+            title: "Famous Viewing",
+            description: "Gain more fame based on your viewers.",
+            cost: new Decimal(2),
+            effect() {
+                return player.v.points.add(1).pow(0.5)
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
+        },
+        12: {
+            title: "Expo-Exponential",
+            description: "Add 2 to 'Exponential' effect base.",
+            cost: new Decimal(3),
+            unlocked () {return hasUpgrade ('v', 11)}
+        },
+        13: {
+            title: "Column 2 Boost",
+            description: "Boost the 2 upgrades in the second column of fame upgrades.",
+            cost: new Decimal(5),
+            unlocked () {return hasUpgrade ('v', 12)},
+            effect() {
+                return player.f.points.pow(0.5)
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
+        }
+    },
+
+    milestones: {
+        0: {
+            requirementDescription: "5 Viewers",
+            done () {
+                return player.v.best.gte(5)
+            },
+            effectDescription: "Keep fame upgrades on reset."
+        },
+    },
+
+    buyables: {
+        11: {
+            cost() { 
+                return getBuyableAmount(this.layer, this.id).times(2).pow_base(2); 
+            },
+            title: "Loyal Viewers",
+            effect() {
+                return getBuyableAmount(this.layer, this.id).times(1.5);
+            },
+            display() {
+                return "Multiply views effect by 1.50x<br>Amount: "+format(getBuyableAmount(this.layer, this.id))+
+                "<br> Cost: "+format(tmp.v.buyables[11].cost)+" viewers<br>Effect: "+format(tmp.v.buyables[11].effect)+"x"
+            },
+            buy() {
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+                return player[this.layer].points.gte(this.cost())
+            }
+        },
+    },
+})   
+
 addLayer("a", {
     startData() { return {
         unlocked: true,
@@ -184,7 +327,21 @@ addLayer("a", {
         done() {
             return hasUpgrade('f', 25)
         }
-    }
+    },
+    21: {
+        name: "Someone's Watching",
+        tooltip: "Gain your first viewer.",
+        done() {
+            return player.v.points.gte(1)
+        },
+    },
+    22: {
+        name: "Double Viewer",
+        tooltip: "Gain 2 loyal viewers.",
+        done() {
+            return getBuyableAmount('v', 11).gte(2)
+        }
+    },
     },
    },
 )

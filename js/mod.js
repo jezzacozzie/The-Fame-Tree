@@ -13,11 +13,17 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.0.2",
+	num: "0.1.0",
 	name: "Literally nothing",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.1.0</h3><br>
+		- Added viewers.<br>
+		- Added 3 upgrades.<br>
+		- Added 2 achievements.<br>
+		- Added 1 buyable.<br>
+		- Added 1 milestone.<br>
 	<h3>v0.0.2</h3><br>
 		- Added 5 upgrades.<br>
 		- Added 1 achievement.<br>
@@ -57,6 +63,7 @@ function getPointGen() {
 	if (hasUpgrade('f', 12)) gain = gain.times(upgradeEffect ('f', 12))
 	if (hasUpgrade('f', 14)) gain = gain.times(upgradeEffect ('f', 14))
 	if (hasUpgrade('f', 21)) gain = gain.add(0.1)
+	if (player.v.unlocked) gain = gain.times(tmp.v.effect)
 	return gain
 }
 
@@ -66,7 +73,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-	`<h3><a>Endgame: 30 fame.</a></h3>`
+	`<h3><a>Endgame: 7 viewers.</a></h3>`
 ]
 
 // Determines when the game "ends"

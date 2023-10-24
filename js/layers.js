@@ -69,7 +69,9 @@ addLayer("f", {
         description: "Multiply fame gain by popularity.",
         cost: new Decimal(2),
         effect() {
-            return player.points.add(1).pow(0.1)
+            let eff = player.points.add(1).pow(0.1)
+            if (hasUpgrade('v', 31)) eff = eff.pow(upgradeEffect('v', 31))
+            return eff
         },
         effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
         unlocked() {
@@ -188,7 +190,8 @@ addLayer("v", {
     ],
     layerShown(){return hasAchievement ('a', 14)}, 
     effect() {
-        let eff = player.v.points.add(1)
+        let eff = player.v.points.add(1).max(1)
+        eff = eff.times(tmp.v.effectBase)
         if (hasUpgrade ('v', 22)) eff = eff.add(50)
         eff = eff.times(tmp.v.buyables[11].effect)
         return eff
@@ -199,8 +202,10 @@ addLayer("v", {
     },
     effectBase() {
         let base = new Decimal(1)
+        if (hasUpgrade ('v', 32)) base = base.add(upgradeEffect('v', 32))
         return base
     },
+    canBuyMax() {return hasMilestone('v', 3)},
 
     tabFormat: {
         "Main": {
@@ -282,6 +287,26 @@ addLayer("v", {
             },
             effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))},
         },
+        31: {
+            title: "Public Recognition",
+            description: "Raise 'Recognition' based on viewers.",
+            cost: new Decimal(10),
+            unlocked() {return hasUpgrade ('v', 23)},
+            effect() {
+                return player.v.points.add(1).pow(0.15)
+            },
+            effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))},
+        },
+        32: {
+            title: "Base-Boost",
+            description: "Add to viewers base based on fame.",
+            cost: new Decimal(11),
+            unlocked() {return hasUpgrade ('v', 31)},
+            effect() {
+                return player.f.points.add(1).pow(0.15)
+            },
+            effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
+        },
     },
 
     milestones: {
@@ -305,6 +330,13 @@ addLayer("v", {
                 return player.v.best.gte(8)
             },
             effectDescription: "Gain 100% of fame gain per second."
+        },
+        3: {
+            requirementDescription: "10 Viewers",
+            done() {
+                return player.v.best.gte(10)
+            },
+            effectDescription: "You can buy max viewers."
         },
     },
 

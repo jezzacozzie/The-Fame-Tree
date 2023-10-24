@@ -13,11 +13,14 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.1.1",
+	num: "0.1.2",
 	name: "Literally nothing",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.1.2</h3><br>
+		- Added 2 upgrades.<br>
+		- Added 1 milestone.<br>
 	<h3>v0.1.1</h3><br>
 		- Added 3 upgrades.<br>
 		- Added 2 milestones.<br>
@@ -81,7 +84,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-	`<h3><a>Endgame: 10 viewers.</a></h3>`
+	`<h3><a>Endgame: 12 viewers.</a></h3>`
 ]
 
 // Determines when the game "ends"

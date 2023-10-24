@@ -37,6 +37,9 @@ addLayer("f", {
         if (hasMilestone ('v', 0) && resettingLayer=="v") keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
     },
+    passiveGeneration() {
+        return hasMilestone ('v', 2)?1:hasMilestone ('v', 1)?0.1:0
+        },
 
     upgrades: {
         rows: 2,
@@ -186,6 +189,7 @@ addLayer("v", {
     layerShown(){return hasAchievement ('a', 14)}, 
     effect() {
         let eff = player.v.points.add(1)
+        if (hasUpgrade ('v', 22)) eff = eff.add(50)
         eff = eff.times(tmp.v.buyables[11].effect)
         return eff
     },
@@ -195,12 +199,14 @@ addLayer("v", {
     },
     effectBase() {
         let base = new Decimal(1)
+        return base
     },
 
     tabFormat: {
         "Main": {
         content:[
             "main-display",
+            "best-points",
             "prestige-button",
             "blank",
             "upgrades",
@@ -249,7 +255,33 @@ addLayer("v", {
                 return player.f.points.pow(0.5)
             },
             effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
-        }
+        },
+        21: {
+            title: "Popular Viewing",
+            description: "Gain more popularity based on your viewers.",
+            cost: new Decimal(6),
+            unlocked() {return hasUpgrade ('v', 13)},
+            effect() {
+                return player.v.points.add(1).pow(0.5)
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
+        }, 
+        22: {
+            title: "Membership",
+            description: "Gain 50 more base viewers.",
+            cost: new Decimal(7),
+            unlocked() {return hasUpgrade ('v', 21)}
+        },
+        23: {
+            title: "^Popular Viewing",
+            description: "Raise popularity based on viewers.",
+            cost: new Decimal(9),
+            unlocked() {return hasUpgrade ('v', 22)},
+            effect() {
+                return player.v.points.add(1).pow(0.1)
+            },
+            effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))},
+        },
     },
 
     milestones: {
@@ -260,12 +292,26 @@ addLayer("v", {
             },
             effectDescription: "Keep fame upgrades on reset."
         },
+        1: {
+            requirementDescription: "7 Viewers",
+            done() {
+                return player.v.best.gte(7)
+            },
+            effectDescription: "Gain 10% of fame gain per second."
+        },
+        2: {
+            requirementDescription: "8 Viewers",
+            done() {
+                return player.v.best.gte(8)
+            },
+            effectDescription: "Gain 100% of fame gain per second."
+        },
     },
 
     buyables: {
         11: {
             cost() { 
-                return getBuyableAmount(this.layer, this.id).times(2).pow_base(2); 
+                return getBuyableAmount(this.layer, this.id).times(1).pow_base(2); 
             },
             title: "Loyal Viewers",
             effect() {
@@ -342,6 +388,13 @@ addLayer("a", {
             return getBuyableAmount('v', 11).gte(2)
         }
     },
+    23: {
+        name: "Everybody Knows Me.",
+        tooltip: "Have 8.00e9 popularity.",
+        done() {
+            return player.points.gte(8e9)
+        }
+    }
     },
    },
 )

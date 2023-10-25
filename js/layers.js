@@ -25,6 +25,7 @@ addLayer("f", {
     gainExp() { // Calculate the exponent on main currency from bonuses
         exp = new Decimal(1)
         if (hasUpgrade ('f', 24)) exp = exp.times(1.01)
+        if (hasUpgrade ('f', 31)) exp = exp.times(upgradeEffect('f', 31))
         return exp
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
@@ -57,6 +58,8 @@ addLayer("f", {
             let eff = player.f.points.add(1).pow(0.3)
             if (hasUpgrade('f', 23)) eff = eff.add(upgradeEffect('f', 23))
             if (hasUpgrade('v', 13)) eff = eff.add(upgradeEffect('v', 13))
+            if (hasUpgrade('f', 34)) eff = eff.add(1e6)
+            eff = softcap(eff, new Decimal(1e6), new Decimal(0.1))
             return eff
         },
         effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
@@ -147,12 +150,56 @@ addLayer("f", {
         description: "Increase 'Fame^2' effect by fame.",
         cost: new Decimal(20),
         effect() {
-            return player.f.points.add(1).pow(0.1)
+            let eff = player.f.points.add(1).pow(0.1)
+            if (hasUpgrade('f', 35)) eff = eff.times(upgradeEffect('f', 35))
+            return eff
         },
-        effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
+        effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
         unlocked() {
             return hasUpgrade ('f', 24)
         }
+    },
+    31: {
+        title: "Fame Exponent",
+        description: "Raise fame based on popularity.",
+        cost: new Decimal(1.5e9),
+        effect() {
+            return player.points.add(1).pow(0.002)
+        },
+        effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))},
+        unlocked() {return hasUpgrade ('v', 33)}
+    },
+    32: {
+        title: "Viewer Viewer",
+        description: "Add to viewers base based on viewers.",
+        cost: new Decimal(2e11),
+        effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
+        effect() {
+            return player.v.points.add(1).pow(2)
+        },
+        unlocked() {return hasUpgrade ('f', 31)}
+    },
+    33: {
+        title: "250 To Go",
+        description: "Divide viewer cost by 250.",
+        cost: new Decimal(1e12),
+        unlocked() {return hasUpgrade ('f', 32)}
+    },
+    34: {
+        title: "Speedy Growth",
+        description: "Growth starts at softcap.",
+        cost: new Decimal(1e12),
+        unlocked() {return hasUpgrade ('f', 33)}
+    },
+    35: {
+        title: "Fame^4",
+        description: "Increase 'Fame^3' effect by fame.",
+        cost: new Decimal(1.5e13),
+        unlocked() {return hasUpgrade ('f', 34)},
+        effect() {
+            return player.f.points.add(1).pow(0.1)
+        },
+        effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
     }
 },
 
@@ -178,6 +225,7 @@ addLayer("v", {
     exponent: 1.5, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
+        if (hasUpgrade('f', 33)) mult = mult.div(250)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -203,6 +251,7 @@ addLayer("v", {
     effectBase() {
         let base = new Decimal(1)
         if (hasUpgrade ('v', 32)) base = base.add(upgradeEffect('v', 32))
+        if (hasUpgrade ('f', 32)) base = base.add(upgradeEffect('f', 32)) 
         return base
     },
     canBuyMax() {return hasMilestone('v', 3)},
@@ -257,7 +306,8 @@ addLayer("v", {
             cost: new Decimal(5),
             unlocked () {return hasUpgrade ('v', 12)},
             effect() {
-                return player.f.points.pow(0.5)
+                let eff = player.f.points.pow(0.5)
+                return eff
             },
             effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
         },
@@ -306,6 +356,14 @@ addLayer("v", {
                 return player.f.points.add(1).pow(0.15)
             },
             effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
+        },
+        33: {
+            title: "Fame Revisit",
+            description: "Unlock 5 new fame upgrades.",
+            cost: new Decimal(12),
+            unlocked() {
+                return hasUpgrade ('v', 32)
+            }
         },
     },
 
@@ -401,7 +459,7 @@ addLayer("a", {
     },
     14: {
         name: "Berry Famous",
-        tooltip: "Have all of the fame upgrades.",
+        tooltip: "Have two rows of fame upgrades.",
         done() {
             return hasUpgrade('f', 25)
         }
@@ -425,6 +483,13 @@ addLayer("a", {
         tooltip: "Have 8.00e9 popularity.",
         done() {
             return player.points.gte(8e9)
+        }
+    },
+    24: {
+        name: "The Perfect Combinations",
+        tooltip: "Have the third row of fame upgrades.",
+        done() {
+            return hasUpgrade('f', 35)
         }
     }
     },

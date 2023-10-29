@@ -20,6 +20,7 @@ addLayer("f", {
         if (hasUpgrade ('f', 22)) mult = mult.times(1.1)
         if (hasUpgrade ('v', 11)) mult = mult.times(upgradeEffect('v', 11))
         if (hasUpgrade ('v', 13)) mult = mult.pow(1.05)
+        if (hasUpgrade ('i', 13)) mult = mult.times(upgradeEffect('i', 13))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -36,6 +37,7 @@ addLayer("f", {
     doReset(resettingLayer) {
         let keep = [];
         if (hasMilestone ('v', 0) && resettingLayer=="v") keep.push("upgrades")
+        if (hasMilestone ('i', 0) && resettingLayer=="i") keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
     },
     passiveGeneration() {
@@ -43,7 +45,7 @@ addLayer("f", {
         },
 
     upgrades: {
-        rows: 2,
+        rows: 3,
         columns: 5,
     11: {
         title: "Exist",
@@ -60,6 +62,7 @@ addLayer("f", {
             if (hasUpgrade('v', 13)) eff = eff.add(upgradeEffect('v', 13))
             if (hasUpgrade('f', 34)) eff = eff.add(1e6)
             eff = softcap(eff, new Decimal(1e6), new Decimal(0.1))
+            if (player.i.unlocked) eff = eff.times(tmp.i.effect)
             return eff
         },
         effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
@@ -167,7 +170,7 @@ addLayer("f", {
             return player.points.add(1).pow(0.002)
         },
         effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))},
-        unlocked() {return hasUpgrade ('v', 33)}
+        unlocked() {return hasUpgrade ('v', 33), hasUpgrade ('f', 25)}
     },
     32: {
         title: "Viewer Viewer",
@@ -215,7 +218,7 @@ addLayer("v", {
         best: new Decimal(0),
         total: new Decimal(0),
     }},
-    color: "#6450D4",
+    color: "#5440C4",
     requires: new Decimal(25), // Can be a function that takes requirement increases into account
     resource: "viewers", // Name of prestige currency
     baseResource: "popularity", // Name of resource prestige is based on
@@ -242,6 +245,7 @@ addLayer("v", {
         eff = eff.times(tmp.v.effectBase)
         if (hasUpgrade ('v', 22)) eff = eff.add(50)
         eff = eff.times(tmp.v.buyables[11].effect)
+        eff = eff.add(1)
         return eff
     },
     effectDescription() {
@@ -251,7 +255,8 @@ addLayer("v", {
     effectBase() {
         let base = new Decimal(1)
         if (hasUpgrade ('v', 32)) base = base.add(upgradeEffect('v', 32))
-        if (hasUpgrade ('f', 32)) base = base.add(upgradeEffect('f', 32)) 
+        if (hasUpgrade ('f', 32)) base = base.add(upgradeEffect('f', 32))
+        if (hasUpgrade ('i', 22)) base = base.add(upgradeEffect('i', 22)) 
         return base
     },
     canBuyMax() {return hasMilestone('v', 3)},
@@ -260,7 +265,10 @@ addLayer("v", {
         "Main": {
         content:[
             "main-display",
-            "best-points",
+            ["display-text",
+            function() {return 'You have ' + formatWhole(player.v.best)+' best viewers.'},
+                {}],
+            "blank",
             "prestige-button",
             "blank",
             "upgrades",
@@ -269,6 +277,10 @@ addLayer("v", {
         "Milestones": {
         content:[
             "main-display",
+            ["display-text",
+            function() {return 'You have ' + formatWhole(player.v.best)+' best viewers.'},
+                {}],
+            "blank",
             "prestige-button",
             "blank",
             "milestones",
@@ -277,6 +289,10 @@ addLayer("v", {
         "Buyables": {
         content:[
             "main-display",
+            ["display-text",
+            function() {return 'You have ' + formatWhole(player.v.best)+' best viewers.'},
+                {}],
+            "blank",
             "prestige-button",
             "blank",
             "buyables",
@@ -307,6 +323,8 @@ addLayer("v", {
             unlocked () {return hasUpgrade ('v', 12)},
             effect() {
                 let eff = player.f.points.pow(0.5)
+                if (hasUpgrade ('i', 11)) eff = eff.add(1e7)
+                eff = softcap(eff, new Decimal(1e7), new Decimal(0))
                 return eff
             },
             effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x" },
@@ -405,7 +423,7 @@ addLayer("v", {
             },
             title: "Loyal Viewers",
             effect() {
-                return getBuyableAmount(this.layer, this.id).times(1.5);
+                return getBuyableAmount(this.layer, this.id). times(1.5);
             },
             display() {
                 return "Multiply views effect by 1.50x<br>Amount: "+format(getBuyableAmount(this.layer, this.id))+
@@ -420,7 +438,202 @@ addLayer("v", {
             }
         },
     },
-})   
+})
+
+addLayer("i", {
+    name: "interactions", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "I", // This appears on the layer's node. Default is the id with the first letter capitalized
+    position: 1, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    startData() { return {
+        unlocked: false,
+		points: new Decimal(0),
+        best: new Decimal(0),
+        total: new Decimal(0),
+    }},
+    color: "#CF4FE1",
+    requires: new Decimal(1e15), // Can be a function that takes requirement increases into account
+    resource: "interactions", // Name of prestige currency
+    baseResource: "fame", // Name of resource prestige is based on
+    baseAmount() {return player.f.points}, // Get the current amount of baseResource
+    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+        branches: ["f"],
+    exponent: 0.005, // Prestige currency exponent
+    gainMult() { // Calculate the multiplier for main currency from bonuses
+        mult = new Decimal(1)
+        mult = mult.times(tmp.i.buyables[11].effect)
+        return mult
+    },
+    gainExp() { // Calculate the exponent on main currency from bonuses
+        exp = new Decimal(1)
+        return exp
+    },
+    row: 1, // Row the layer is in on the tree (0 is the first row)
+    hotkeys: [
+        {key: "I", description: "I: Reset for interactions.", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+    ],
+    layerShown(){return hasAchievement ('a', 24)}, 
+    effect() {
+        let eff = new Decimal(1)
+        eff = eff.add(upgradeEffect('i', 12))
+        return eff
+    },
+    effectDescription() {
+        dis = "which boost 'Growth' multiplier after softcap by "+format(tmp.i.effect)+"x"
+        return dis
+    },
+    effectBase() {
+        let base = new Decimal(1)
+        return base
+    },
+
+    tabFormat: {
+        "Main": {
+        content:[
+            "main-display",
+            ["display-text",
+            function() {return 'You have ' + formatWhole(player.i.best)+' best interactions.'},
+                {}],
+            ["display-text",
+                function() {return 'You have ' + formatWhole(player.i.total)+' total interactions.'},
+                    {}],
+            "blank",
+            "prestige-button",
+            "blank",
+            "upgrades",
+        ]
+        },
+        "Milestones": {
+        content:[
+            "main-display",
+            ["display-text",
+            function() {return 'You have ' + formatWhole(player.i.best)+' best interactions.'},
+                {}],
+            ["display-text",
+                function() {return 'You have ' + formatWhole(player.i.total)+' total interactions.'},
+                    {}],
+            "blank",
+            "prestige-button",
+            "blank",
+            "milestones",
+        ]
+        },
+        "Advertisements": {
+        content:[
+            "main-display",
+            ["display-text",
+            function() {return 'You have ' + formatWhole(player.i.best)+' best interactions.'},
+                {}],
+            ["display-text",
+                function() {return 'You have ' + formatWhole(player.i.total)+' total interactions.'},
+                    {}],
+            "blank",
+            "prestige-button",
+            "blank",
+            ["bar", "bigBar"],
+            "blank",
+            "buyables",
+        ]
+        }
+    },
+
+    upgrades: {
+        11: {
+            title: "Full-Capped",
+            description: "'Column 2 Boost' starts at its hardcap.",
+            cost: new Decimal(2)
+        },
+        12: {
+            title: "Interconnection",
+            description: "Add to the above effect per interaction.",
+            cost: new Decimal(3),
+            effect() {
+                let eff = player.i.points.times(0.02)
+                if (hasUpgrade('i', 21)) eff = player.i.best.times(0.02)
+                return eff
+            },
+            effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
+            unlocked() {return hasUpgrade('i', 11)}
+        },
+        13: {
+            title: "Fame-ous Interactions",
+            description: "Add to fame gain based on interactions.",
+            cost: new Decimal(4),
+            effect() {
+                let eff = player.i.points.add(1).pow(0.75)
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"},
+            unlocked() {return hasUpgrade('i', 12)}
+        },
+        21: {
+            title: "Interconnected",
+            description: "'Interconnection' is based on best interactions.",
+            cost: new Decimal(10),
+            unlocked() {return hasUpgrade('i', 13), hasAchievement('a', 32)}
+        },
+        22: {
+            title: "Inter-Base",
+            description: "Viewers base is boosted by interactions.",
+            cost: new Decimal(20),
+            unlocked() {return hasUpgrade('i', 21)},
+            effect() {
+                let eff = player.i.points.add(1).pow(1.5).times(5)
+                return eff
+            },
+            effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
+        },
+    },
+
+    milestones: {
+        0: {
+            requirementDescription: "3 Total Interactions",
+            effectDescription: "Keep fame upgrades on reset.",
+            done() {return player.i.total.gte(3)}
+        },
+    },
+
+    bars: {
+        bigBar: {
+            direction: RIGHT,
+            width: 650,
+            height: 40,
+            fillStyle: {'background-color' : "#cf4fe1"},
+            borderStyle() { return {"border-color": "#cf4fe1"} },
+            progress() {
+                let prog = player.i.points.div(10)
+                if (player.i.best.gte(10)) prog = 1
+                return prog
+            },
+            display() {
+                if (player.i.best.lte(9))
+                return "Unlock an advertisement: "+format(player.i.points)+"/10 interactions."
+                else
+                return "You have unlocked Train Advertisements."
+            }
+        },
+    },
+
+    buyables: {
+        11: {
+            title: "Train Advertisements",
+            unlocked() {return player.i.best.gte(10)},
+            effect() {return getBuyableAmount(this.layer, this.id).times(1).pow_base(2);},
+            cost() {return getBuyableAmount(this.layer, this.id).add(1).pow(2).times(10);},
+            buy() {
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+                return player[this.layer].points.gte(this.cost())
+            },
+            display() {
+                return "Multiply interactions gain by 2 per buyable amount.<br>Amount: "+format(getBuyableAmount(this.layer, this.id))+
+                "<br>Cost: "+format(tmp.i.buyables[11].cost)+" interactions.<br>Effect: "+format(tmp.i.buyables[11].effect)+"x"
+            }
+        }
+    }
+
+})
 
 addLayer("a", {
     startData() { return {
@@ -490,6 +703,20 @@ addLayer("a", {
         tooltip: "Have the third row of fame upgrades.",
         done() {
             return hasUpgrade('f', 35)
+        }
+    },
+    31: {
+        name: "FREE PUBLICITY",
+        tooltip: "Gain your first interaction.",
+        done() {
+            return player.i.points.gte(1)
+        }
+    },
+    32: {
+        name: "Getting The World To See",
+        tooltip: "Have 1 of any type of advertisement.",
+        done() {
+            return getBuyableAmount('i', 11).gte(1)
         }
     }
     },

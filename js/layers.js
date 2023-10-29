@@ -577,7 +577,7 @@ addLayer("i", {
             cost: new Decimal(20),
             unlocked() {return hasUpgrade('i', 21)},
             effect() {
-                let eff = player.i.points.add(1).pow(1.5).times(5)
+                let eff = player.i.points.add(1).pow(1.5)
                 return eff
             },
             effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
@@ -618,7 +618,11 @@ addLayer("i", {
             title: "Train Advertisements",
             unlocked() {return player.i.best.gte(10)},
             effect() {return getBuyableAmount(this.layer, this.id).times(1).pow_base(2);},
-            cost() {return getBuyableAmount(this.layer, this.id).add(1).pow(2).times(10);},
+            cost() {
+                let cost = getBuyableAmount(this.layer, this.id).add(1).pow(2).times(10)
+                if (getBuyableAmount(this.layer, this.id).gte(2)) cost = cost.pow(2)
+                return cost
+            },
             buy() {
                 player[this.layer].points = player[this.layer].points.sub(this.cost())
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))

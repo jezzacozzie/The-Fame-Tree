@@ -170,7 +170,7 @@ addLayer("f", {
             return player.points.add(1).pow(0.002)
         },
         effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))},
-        unlocked() {return hasUpgrade ('v', 33), hasUpgrade ('f', 25)}
+        unlocked() {return hasUpgrade ('v', 33)}
     },
     32: {
         title: "Viewer Viewer",
@@ -246,6 +246,9 @@ addLayer("v", {
         if (hasUpgrade ('v', 22)) eff = eff.add(50)
         eff = eff.times(tmp.v.buyables[11].effect)
         eff = eff.add(1)
+        eff = softcap(eff, new Decimal(1e6), new Decimal(0.5))
+        eff = softcap(eff, new Decimal(1e7), new Decimal(0.25))
+        eff = softcap(eff, new Decimal(1e8), new Decimal(0.125))
         return eff
     },
     effectDescription() {
@@ -485,6 +488,9 @@ addLayer("i", {
         let base = new Decimal(1)
         return base
     },
+    passiveGeneration() {
+        return hasMilestone ('i', 1)?0.1:0
+        },
 
     tabFormat: {
         "Main": {
@@ -531,6 +537,8 @@ addLayer("i", {
             "blank",
             ["bar", "bigBar"],
             "blank",
+            ["bar", 'biggerBar'],
+            "blank",
             "buyables",
         ]
         }
@@ -560,6 +568,7 @@ addLayer("i", {
             cost: new Decimal(4),
             effect() {
                 let eff = player.i.points.add(1).pow(0.75)
+                eff = softcap(eff, new Decimal(100), new Decimal(0))
                 return eff
             },
             effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"},
@@ -582,6 +591,17 @@ addLayer("i", {
             },
             effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
         },
+        23: {
+            title: "Inter-Raise",
+            description: "Interactions raise popularity gain.",
+            cost: new Decimal(100),
+            unlocked() {return hasUpgrade ('i', 22)},
+            effect() {
+                let eff = player.i.points.add(1).pow(0.01)
+                return eff
+            },
+            effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))},
+        }
     },
 
     milestones: {
@@ -589,6 +609,11 @@ addLayer("i", {
             requirementDescription: "3 Total Interactions",
             effectDescription: "Keep fame upgrades on reset.",
             done() {return player.i.total.gte(3)}
+        },
+        1: {
+            requirementDescription: "300 Total Interactions",
+            effectDescription: "Gain 10% of interactions gain per second.",
+            done() {return player.i.total.gte(300)}
         },
     },
 
@@ -611,6 +636,25 @@ addLayer("i", {
                 return "You have unlocked Train Advertisements."
             }
         },
+        biggerBar: {
+            direction: RIGHT,
+            width: 650,
+            height: 40,
+            fillStyle: {'background-color' : "#cf4fe1"},
+            borderStyle() { return {"border-color": "#cf4fe1"} },
+            progress() {
+                let prog = player.i.points.div(500)
+                if (player.i.best.gte(500)) prog = 1
+                return prog
+            },
+            display() {
+                if (player.i.best.lte(499))
+                return "Unlock an advertisement: "+format(player.i.points)+"/500 interactions."
+                else
+                return "You have unlocked Billboards."
+            },
+            unlocked() {return player.i.best.gte(10)}
+        },
     },
 
     buyables: {
@@ -621,6 +665,7 @@ addLayer("i", {
             cost() {
                 let cost = getBuyableAmount(this.layer, this.id).add(1).pow(2).times(10)
                 if (getBuyableAmount(this.layer, this.id).gte(2)) cost = cost.pow(2)
+                if (getBuyableAmount('i', 12).gte(1)) cost = cost.div(tmp.i.buyables[12].effect)
                 return cost
             },
             buy() {
@@ -634,7 +679,27 @@ addLayer("i", {
                 return "Multiply interactions gain by 2 per buyable amount.<br>Amount: "+format(getBuyableAmount(this.layer, this.id))+
                 "<br>Cost: "+format(tmp.i.buyables[11].cost)+" interactions.<br>Effect: "+format(tmp.i.buyables[11].effect)+"x"
             }
-        }
+        },
+        12: {
+            title: "Billboards",
+            unlocked() {return player.i.best.gte(500)},
+            effect() {return getBuyableAmount(this.layer, this.id).times(1).pow_base(1.5);},
+            cost() {
+                let cost = getBuyableAmount(this.layer, this.id).add(1).pow(1.325).times(500)
+                return cost
+            },
+            buy() {
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+                return player[this.layer].points.gte(this.cost())
+            },
+            display() {
+                return "Divide cost of Train Advertisements based on buyable amounts.<br>Amount: "+format(getBuyableAmount(this.layer, this.id))+
+                "<br>Cost: "+format(tmp.i.buyables[12].cost)+" interactions.<br>Effect: "+format(tmp.i.buyables[12].effect)+"x"
+            }
+        },
     }
 
 })

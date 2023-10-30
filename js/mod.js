@@ -13,11 +13,16 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.2.0",
-	name: "Literally nothing",
+	num: "0.2.1",
+	name: "Advertising Breakthrough",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.2.1</h3><br>
+		- Added 1 upgrade.<br>
+		- Added 1 milestone.<br>
+		- Added 1 advertisement.<br>
+		- Balanced advertisements.<br>
 	<h2>v0.2.0</h2><br>
 		- Added interactions.<br>
 		- Added 5 upgrades.<br>
@@ -83,6 +88,7 @@ function getPointGen() {
 	if (hasUpgrade('f', 21)) gain = gain.add(0.1)
 	if (hasUpgrade('v', 21)) gain = gain.times(upgradeEffect ('v', 21))
 	if (hasUpgrade('v', 23)) gain = gain.pow(upgradeEffect('v', 23))
+	if (hasUpgrade('i', 23)) gain = gain.pow(upgradeEffect('i', 23))
 	if (player.v.unlocked) gain = gain.times(tmp.v.effect)
 	return gain
 }
@@ -93,7 +99,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-	`<h3><a>Endgame: 30 interactions.</a></h3>`
+	`<h3><a>Endgame: 500 interactions.</a></h3>`
 ]
 
 // Determines when the game "ends"

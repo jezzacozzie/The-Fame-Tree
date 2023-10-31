@@ -682,10 +682,10 @@ addLayer("i", {
         },
         12: {
             title: "Billboards",
-            unlocked() {return player.i.best.gte(500)},
+            unlocked() {return player.i.best.gte(200)},
             effect() {return getBuyableAmount(this.layer, this.id).times(1).pow_base(1.5);},
             cost() {
-                let cost = getBuyableAmount(this.layer, this.id).add(1).pow(1.5).times(200)
+                let cost = getBuyableAmount(this.layer, this.id).add(1).pow(1.75).times(200)
                 return cost
             },
             buy() {

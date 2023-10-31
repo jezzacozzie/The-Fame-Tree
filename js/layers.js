@@ -643,13 +643,13 @@ addLayer("i", {
             fillStyle: {'background-color' : "#cf4fe1"},
             borderStyle() { return {"border-color": "#cf4fe1"} },
             progress() {
-                let prog = player.i.points.div(500)
-                if (player.i.best.gte(500)) prog = 1
+                let prog = player.i.points.div(200)
+                if (player.i.best.gte(200)) prog = 1
                 return prog
             },
             display() {
-                if (player.i.best.lte(499))
-                return "Unlock an advertisement: "+format(player.i.points)+"/500 interactions."
+                if (player.i.best.lte(199))
+                return "Unlock an advertisement: "+format(player.i.points)+"/200 interactions."
                 else
                 return "You have unlocked Billboards."
             },
@@ -685,7 +685,7 @@ addLayer("i", {
             unlocked() {return player.i.best.gte(500)},
             effect() {return getBuyableAmount(this.layer, this.id).times(1).pow_base(1.5);},
             cost() {
-                let cost = getBuyableAmount(this.layer, this.id).add(1).pow(1.325).times(500)
+                let cost = getBuyableAmount(this.layer, this.id).add(1).pow(1.5).times(200)
                 return cost
             },
             buy() {

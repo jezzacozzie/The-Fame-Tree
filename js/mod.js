@@ -13,11 +13,16 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.2.1",
-	name: "Advertising Breakthrough",
+	num: "0.2.2",
+	name: "Balancing Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.2.2</h3><br>
+		- Added 1 upgrade.<br>
+		- Balanced 2nd advertisement cost.<br>
+		- Fixed fame 31 showing w/o upgrade.<br>
+		- Fixed a typo.<br>
 	<h3>v0.2.1</h3><br>
 		- Added 1 upgrade.<br>
 		- Added 1 milestone.<br>
@@ -58,7 +63,8 @@ let changelog = `<h1>Changelog:</h1><br>
 	<h3>v0.0.0</h3><br>
 		- Created this changelog.<br>
 		- Updated this mod's name.<br>
-		- Updated the name of points.<br>`
+		- Updated the name of points.<br>
+		<br>`
 	
 
 let winText = `Congratulations! You have reached the end and beaten this game, but for now...`

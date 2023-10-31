@@ -229,6 +229,7 @@ addLayer("v", {
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
         if (hasUpgrade('f', 33)) mult = mult.div(250)
+        if (hasUpgrade('i', 31)) mult = mult.div(upgradeEffect('i', 31))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -481,7 +482,7 @@ addLayer("i", {
         return eff
     },
     effectDescription() {
-        dis = "which boost 'Growth' multiplier after softcap by "+format(tmp.i.effect)+"x"
+        dis = "which boosts 'Growth' multiplier after softcap by "+format(tmp.i.effect)+"x"
         return dis
     },
     effectBase() {
@@ -601,6 +602,18 @@ addLayer("i", {
                 return eff
             },
             effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))},
+        },
+        31: {
+            title: "Cheap Viewing",
+            description: "Viewers are cheaper based on interactions.",
+            cost: new Decimal(200),
+            unlocked() {return hasUpgrade ('i', 23)},
+            effect() {
+                let eff = player.i.points.add(1).pow(5)
+                eff = softcap(eff, new Decimal(1e13), new Decimal(0.05))
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"},
         }
     },
 

@@ -13,15 +13,18 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.2.2",
-	name: "Balancing Update",
+	num: "0.2.3",
+	name: "Achievement Update",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.2.3</h3><br>
+		- Added 3 achievements.<br>
+		- Added 1 upgrade.<br>
 	<h3>v0.2.2</h3><br>
 		- Added 1 upgrade.<br>
-		- Balanced 2nd advertisement cost.<br>
-		- Fixed fame 31 showing w/o upgrade.<br>
+		- Rebalanced 2nd advertisement.<br>
+		- Fixed fame 31 showing bug.<br>
 		- Fixed a typo.<br>
 	<h3>v0.2.1</h3><br>
 		- Added 1 upgrade.<br>

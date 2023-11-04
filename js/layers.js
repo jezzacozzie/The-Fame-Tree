@@ -241,7 +241,7 @@ addLayer("f", {
         },
         44: {
             title: "Back to Basics",
-            description: "Multiply 'Growth' after softcap based on product of fame and popularity.",
+            description: "Multiply 'Growth' after softcap based on fame.",
             cost: new Decimal(2.5e25),
             unlocked() {return hasUpgrade('f', 43)},
             effect() {

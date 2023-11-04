@@ -116,7 +116,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-	`<h3><a>Endgame: 1e30 fame.</a></h3>`
+	`<h3><a>Endgame: 1e30 fame.</a></h3><br><small>the game is balanced up until this point,<br> going past it will risk hyperinflation<br> and you having to hard reset.</small>`
 ]
 
 // Determines when the game "ends"

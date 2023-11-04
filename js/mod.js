@@ -13,11 +13,15 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.2.3",
-	name: "Achievement Update",
+	num: "0.2.4",
+	name: "Fame Upgrades",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.2.4</h3><br>
+		- Added 6 upgrades.<br>
+		- Added 2 achievements.<br>
+		- Added 1 advertisement.<br>
 	<h3>v0.2.3</h3><br>
 		- Added 3 achievements.<br>
 		- Added 1 upgrade.<br>
@@ -108,7 +112,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-	`<h3><a>Endgame: 500 interactions.</a></h3>`
+	`<h3><a>Endgame: 1e30 fame.</a></h3>`
 ]
 
 // Determines when the game "ends"

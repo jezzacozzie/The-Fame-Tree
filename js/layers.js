@@ -64,6 +64,7 @@ addLayer("f", {
                 if (hasUpgrade('v', 13)) eff = eff.add(upgradeEffect('v', 13))
                 if (hasUpgrade('f', 34)) eff = eff.add(1e6)
                 eff = softcap(eff, new Decimal(1e6), new Decimal(0.1))
+                if (hasUpgrade('f', 44)) eff = eff.times(upgradeEffect('f', 44))
                 if (player.i.unlocked) eff = eff.times(tmp.i.effect)
                 return eff
             },
@@ -202,12 +203,69 @@ addLayer("f", {
             cost: new Decimal(1.5e13),
             unlocked() { return hasUpgrade('f', 34) },
             effect() {
-                return player.f.points.add(1).pow(0.1)
+                let eff = player.f.points.add(1).pow(0.1)
+                if (hasUpgrade('f', 45)) eff = eff.times(upgradeEffect ('f', 45))
+                return eff
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "x" },
+        },
+        41: {
+            title: "On The Up",
+            description: "Raise 'Interconnection' based on fame.",
+            cost: new Decimal(1e22),
+            unlocked() {return hasUpgrade('i', 33)},
+            effect() {
+                return player.f.points.add(1).pow(0.005)
+            },
+            effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))},
+        },
+        42: {
+            title: "We Already Have Viewers!",
+            description: "Unlock another advertisement.",
+            cost: new Decimal(1.5e23),
+            unlocked() {return hasUpgrade('f', 41)},
+        },
+        43: {
+            title: "Out of Thin Air",
+            description: "Add to effective viewers based on best interactions",
+            cost: new Decimal(1e25),
+            unlocked() {return hasUpgrade('f', 42)},
+            effect() {return player.i.best},
+            effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
+            style: {
+                height: "120px",
+                width: "120px",
+            },
+        },
+        44: {
+            title: "Back to Basics",
+            description: "Multiply 'Growth' after softcap based on product of fame and popularity.",
+            cost: new Decimal(2.5e25),
+            unlocked() {return hasUpgrade('f', 43)},
+            effect() {
+                let eff = player.points
+                eff = eff.times(player.f.points)
+                eff = eff.log(10)
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"},
+            style: {
+                height: "120px",
+                width: "120px",
+            },
+        },
+        45: {
+            title: "Fame^5",
+            description: "Increase 'Fame^4' effect by fame.",
+            cost: new Decimal(1e27),
+            unlocked() {return hasUpgrade('f', 44)},
+            effect() {
+                let eff = player.f.points.add(1).pow(0.05)
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"},
         }
     },
-
 })
 
 addLayer("v", {
@@ -249,6 +307,7 @@ addLayer("v", {
         let eff = player.v.points.add(1).max(1)
         eff = eff.times(tmp.v.effectBase)
         if (hasUpgrade('v', 22)) eff = eff.add(50)
+        if (hasUpgrade('f', 43)) eff = eff.add(upgradeEffect('f', 43))
         eff = eff.times(tmp.v.buyables[11].effect)
         eff = eff.add(1)
         eff = softcap(eff, new Decimal(1e6), new Decimal(0.5))
@@ -479,7 +538,7 @@ addLayer("i", {
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        { key: "I", description: "I: Reset for interactions.", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
+        { key: "i", description: "I: Reset for interactions.", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
     ],
     layerShown() { return hasAchievement('a', 24) },
     effect() {
@@ -546,6 +605,8 @@ addLayer("i", {
                 "blank",
                 ["bar", 'biggerBar'],
                 "blank",
+                ["bar", 'biggestBar'],
+                "blank",
                 "buyables",
             ]
         }
@@ -564,6 +625,7 @@ addLayer("i", {
             effect() {
                 let eff = player.i.points.times(0.02)
                 if (hasUpgrade('i', 21)) eff = player.i.best.times(0.02)
+                if (hasUpgrade('f', 41)) eff = eff.pow(upgradeEffect('f', 41))
                 return eff
             },
             effectDisplay() { return "+" + format(upgradeEffect(this.layer, this.id)) },
@@ -631,6 +693,12 @@ addLayer("i", {
             cost: new Decimal(350),
             unlocked() {return hasUpgrade('i', 31)},
         },
+        33: {
+            title: "Fame Revisit II",
+            description: "Unlock 5 new fame upgrades.",
+            cost: new Decimal(500),
+            unlocked() {return hasUpgrade('i', 32)},
+        }
     },
 
     milestones: {
@@ -684,13 +752,36 @@ addLayer("i", {
             },
             unlocked() { return player.i.best.gte(10) }
         },
+        biggestBar: {
+            direction: RIGHT,
+            width: 650,
+            height: 40,
+            fillStyle: { 'background-color': "#cf4fe1" },
+            borderStyle() { return { "border-color": "#cf4fe1" } },
+            progress() {
+                let prog = player.i.points.div(750)
+                if (player.i.best.gte(750)) prog = 1
+                return prog
+            },
+            display() {
+                if (player.i.best.lte(749))
+                    return "Unlock an advertisement: " + format(player.i.points) + "/750 interactions."
+                else
+                    return "You have unlocked TV Broadcasts."
+            },
+            unlocked() { return hasUpgrade('f', 42)}
+        },
     },
 
     buyables: {
         11: {
             title: "Train Advertisements",
             unlocked() { return player.i.best.gte(10) },
-            effect() { return getBuyableAmount(this.layer, this.id).times(1).pow_base(2); },
+            effect() { 
+                let eff = getBuyableAmount(this.layer, this.id).times(1).pow_base(2)
+                if (getBuyableAmount('i', 13).gte(1)) eff = eff.times(tmp.i.buyables[13].effect)
+                return eff
+             },
             cost() {
                 let cost = getBuyableAmount(this.layer, this.id).add(1).pow(2).times(10)
                 if (getBuyableAmount(this.layer, this.id).gte(2)) cost = cost.pow(2)
@@ -727,6 +818,26 @@ addLayer("i", {
             display() {
                 return "Divide cost of Train Advertisements based on buyable amounts.<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
                     "<br>Cost: " + format(tmp.i.buyables[12].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[12].effect) + "x"
+            }
+        },
+        13: {
+            title: "TV Broadcasts",
+            unlocked() { return player.i.best.gte(750) },
+            effect() { return getBuyableAmount(this.layer, this.id).times(1).pow_base(1.1); },
+            cost() {
+                let cost = getBuyableAmount(this.layer, this.id).add(1).pow(2).times(750)
+                return cost
+            },
+            buy() {
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+                return player[this.layer].points.gte(this.cost())
+            },
+            display() {
+                return "Increase effect of Train Advertisements based on buyable amounts.<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
+                    "<br>Cost: " + format(tmp.i.buyables[13].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[13].effect) + "x"
             }
         },
     }
@@ -814,7 +925,7 @@ addLayer("a", {
         },
         25: {
             name: "The Perfect Combinations",
-            tooltip: "Have the third row of fame upgrades.",
+            tooltip: "Have three rows of fame upgrades.",
             done() {
                 return hasUpgrade('f', 35)
             }
@@ -838,6 +949,20 @@ addLayer("a", {
             tooltip: "Have the viewer effect exceed 1 million.",
             done() {
                 return tmp.v.effect.gte(1e6)
+            }
+        },
+        34: {
+            name: "You Can't Spell Advertisements Without [REDACTED]",
+            tooltip: "Have 3 advertisements.",
+            done() {
+                return getBuyableAmount('i', 13)
+            }
+        },
+        35: {
+            name: "The Ranks of the Universe",
+            tooltip: "Have four rows of fame upgrades.",
+            done() {
+                return hasUpgrade('f', 45)
             }
         }
     },

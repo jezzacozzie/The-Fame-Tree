@@ -64,7 +64,6 @@ addLayer("f", {
                 if (hasUpgrade('v', 13)) eff = eff.add(upgradeEffect('v', 13))
                 if (hasUpgrade('f', 34)) eff = eff.add(1e6)
                 eff = softcap(eff, new Decimal(1e6), new Decimal(0.1))
-                if (hasUpgrade('f', 44)) eff = eff.times(upgradeEffect('f', 44))
                 if (player.i.unlocked) eff = eff.times(tmp.i.effect)
                 return eff
             },
@@ -203,9 +202,7 @@ addLayer("f", {
             cost: new Decimal(1.5e13),
             unlocked() { return hasUpgrade('f', 34) },
             effect() {
-                let eff = player.f.points.add(1).pow(0.1)
-                if (hasUpgrade('f', 45)) eff = eff.times(upgradeEffect ('f', 45))
-                return eff
+                return player.f.points.add(1).pow(0.1)
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "x" },
         },
@@ -226,7 +223,7 @@ addLayer("f", {
             unlocked() {return hasUpgrade('f', 41)},
         },
         43: {
-            title: "Out of Thin Air",
+            title: "Out Of Thin Air",
             description: "Add to effective viewers based on best interactions",
             cost: new Decimal(1e25),
             unlocked() {return hasUpgrade('f', 42)},
@@ -236,34 +233,6 @@ addLayer("f", {
                 height: "120px",
                 width: "120px",
             },
-        },
-        44: {
-            title: "Back to Basics",
-            description: "Multiply 'Growth' after softcap based on product of fame and popularity.",
-            cost: new Decimal(2.5e25),
-            unlocked() {return hasUpgrade('f', 43)},
-            effect() {
-                let eff = player.points
-                eff = eff.times(player.f.points)
-                eff = eff.log(10)
-                return eff
-            },
-            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"},
-            style: {
-                height: "120px",
-                width: "120px",
-            },
-        },
-        45: {
-            title: "Fame^5",
-            description: "Increase 'Fame^4' effect by fame.",
-            cost: new Decimal(1e27),
-            unlocked() {return hasUpgrade('f', 44)},
-            effect() {
-                let eff = player.f.points.add(1).pow(0.05)
-                return eff
-            },
-            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"},
         }
     },
 })
@@ -925,7 +894,7 @@ addLayer("a", {
         },
         25: {
             name: "The Perfect Combinations",
-            tooltip: "Have three rows of fame upgrades.",
+            tooltip: "Have the third row of fame upgrades.",
             done() {
                 return hasUpgrade('f', 35)
             }
@@ -955,14 +924,7 @@ addLayer("a", {
             name: "You Can't Spell Advertisements Without [REDACTED]",
             tooltip: "Have 3 advertisements.",
             done() {
-                return getBuyableAmount('i', 13).gte(1)
-            }
-        },
-        35: {
-            name: "The Ranks of the Universe",
-            tooltip: "Have four rows of fame upgrades.",
-            done() {
-                return hasUpgrade('f', 45)
+                return getBuyableAmount('i', 13)
             }
         }
     },

@@ -955,7 +955,7 @@ addLayer("a", {
             name: "You Can't Spell Advertisements Without [REDACTED]",
             tooltip: "Have 3 advertisements.",
             done() {
-                return getBuyableAmount('i', 13)
+                return getBuyableAmount('i', 13).gte(1)
             }
         },
         35: {

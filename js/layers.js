@@ -23,6 +23,7 @@ addLayer("f", {
         if (hasUpgrade('v', 11)) mult = mult.times(upgradeEffect('v', 11))
         if (hasUpgrade('v', 13)) mult = mult.pow(1.05)
         if (hasUpgrade('i', 13)) mult = mult.times(upgradeEffect('i', 13))
+        if (hasUpgrade('k', 33)) mult = mult.pow(1.1)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -40,6 +41,7 @@ addLayer("f", {
         let keep = [];
         if (hasMilestone('v', 0) && resettingLayer == "v") keep.push("upgrades")
         if (hasMilestone('i', 0) && resettingLayer == "i") keep.push("upgrades")
+        if (hasMilestone('k', 0) && resettingLayer == "k") keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
     },
     passiveGeneration() {
@@ -302,7 +304,7 @@ addLayer("v", {
     hotkeys: [
         { key: "v", description: "V: Reset for viewers.", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
     ],
-    layerShown() { return hasAchievement('a', 14) },
+    layerShown() { return hasAchievement('a', 15) },
     effect() {
         let eff = player.v.points.add(1).max(1)
         eff = eff.times(tmp.v.effectBase)
@@ -486,7 +488,9 @@ addLayer("v", {
     buyables: {
         11: {
             cost() {
-                return getBuyableAmount(this.layer, this.id).times(1).pow_base(2);
+                let cost = getBuyableAmount(this.layer, this.id).times(1).pow_base(2)
+                if (hasUpgrade('k', 11)) cost = cost.div(8)
+                return cost;
             },
             title: "Loyal Viewers",
             effect() {
@@ -540,22 +544,24 @@ addLayer("i", {
     hotkeys: [
         { key: "i", description: "I: Reset for interactions.", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
     ],
-    layerShown() { return hasAchievement('a', 24) },
+    layerShown() { return hasAchievement('a', 25) },
     effect() {
         let eff = new Decimal(1)
-        eff = eff.add(upgradeEffect('i', 12))
+        eff = eff.add(tmp.i.effectBase)
+        if (hasUpgrade('i', 12)) eff = eff.add(upgradeEffect('i', 12))
         return eff
     },
     effectDescription() {
-        dis = "which boosts 'Growth' multiplier after softcap by " + format(tmp.i.effect) + "x"
+        dis = "which boosts 'Growth' multiplier after first softcap by " + format(tmp.i.effect) + "x"
         return dis
     },
     effectBase() {
         let base = new Decimal(1)
+        if (hasUpgrade('k', 31)) base = base.add(0.5)
         return base
     },
     passiveGeneration() {
-        return hasMilestone('i', 1) ? 0.01 : 0
+        return hasMilestone('i', 1) ? 0.01:0
     },
 
     tabFormat: {
@@ -625,7 +631,9 @@ addLayer("i", {
             effect() {
                 let eff = player.i.points.times(0.02)
                 if (hasUpgrade('i', 21)) eff = player.i.best.times(0.02)
+                if (hasAchievement('a', 35)) eff = player.i.total.times(0.02)
                 if (hasUpgrade('f', 41)) eff = eff.pow(upgradeEffect('f', 41))
+                eff = softcap(eff, new Decimal(100), new Decimal(0.75))
                 return eff
             },
             effectDisplay() { return "+" + format(upgradeEffect(this.layer, this.id)) },
@@ -846,6 +854,211 @@ addLayer("i", {
 
 })
 
+addLayer("k", {
+    name: "karma", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "K", // This appears on the layer's node. Default is the id with the first letter capitalized
+    position: 2, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    startData() {
+        return {
+            unlocked: true,
+            points: new Decimal(0),
+            best: new Decimal(0),
+            total: new Decimal(0),
+        }
+    },
+    color: "#6e7570",
+    requires: new Decimal(1e30), // Can be a function that takes requirement increases into account
+    resource: "neutral karma", // Name of prestige currency
+    baseResource: "popularity", // Name of resource prestige is based on
+    baseAmount() { return player.points }, // Get the current amount of baseResource
+    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    exponent: 0.1, // Prestige currency exponent
+    gainMult() { // Calculate the multiplier for main currency from bonuses
+        mult = new Decimal(1)
+        return mult
+    },
+    gainExp() { // Calculate the exponent on main currency from bonuses
+        exp = new Decimal(1)
+        return exp
+    },
+    row: 1, // Row the layer is in on the tree (0 is the first row)
+    hotkeys: [
+        { key: "k", description: "K: Reset for neutral karma.", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
+    ],
+    layerShown() {return hasAchievement('a', 35)},
+    branches: ["f"],
+    effectDescription() {return "which can be assigned to different karma types."},
+
+    tabFormat: {
+        "Main": {
+            content: [
+                "main-display",
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.k.best) + ' best neutral karma.' },
+                    {}],
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.k.total) + ' total neutral karma.' },
+                    {}],
+                "blank",
+                "prestige-button",
+                "blank",
+                "buyables",
+            ]
+        },
+        "Milestones": {
+            content: [
+                "main-display",
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.k.best) + ' best neutral karma.' },
+                    {}],
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.k.total) + ' total neutral karma.' },
+                    {}],
+                "blank",
+                "prestige-button",
+                "blank",
+                "milestones",
+            ]
+        },
+        "Karma Upgrades": {
+            content: [
+                "main-display",
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.k.best) + ' best neutral karma.' },
+                    {}],
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.k.total) + ' total neutral karma.' },
+                    {}],
+                "blank",
+                "prestige-button",
+                "blank",
+                "upgrades",
+                "blank",
+                "blank"
+            ]
+        }
+    },
+
+    buyables: {
+        11: {
+            title: "Positive Karma",
+            cost() {
+                return getBuyableAmount(this.layer, this.id).times(1).pow_base(1.2).floor()
+            },
+            canAfford() { return player[this.layer].points.gte(this.cost()) },
+            buy() {
+            player[this.layer].points = player[this.layer].points.sub(this.cost())
+            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            display() {
+                return "Cost: "+format(tmp.k.buyables[11].cost)+"<br>Amount: "+format(getBuyableAmount(this.layer, this.id))
+            },
+        },
+        12: {
+            title: "Composed Karma",
+            cost() {
+                return getBuyableAmount(this.layer, this.id).times(1).pow_base(1.2).floor()
+            },
+            canAfford() { return player[this.layer].points.gte(this.cost()) },
+            buy() {
+            player[this.layer].points = player[this.layer].points.sub(this.cost())
+            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            display() {
+                return "Cost: "+format(tmp.k.buyables[12].cost)+"<br>Amount: "+format(getBuyableAmount(this.layer, this.id))
+            }
+        },
+        21: {
+            title: "Amusing Karma",
+            cost() {
+                return getBuyableAmount(this.layer, this.id).times(1).pow_base(1.2).floor()
+            },
+            canAfford() { return player[this.layer].points.gte(this.cost()) },
+            buy() {
+            player[this.layer].points = player[this.layer].points.sub(this.cost())
+            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            display() {
+                return "Cost: "+format(tmp.k.buyables[21].cost)+"<br>Amount: "+format(getBuyableAmount(this.layer, this.id))
+            },
+            style: {"top": "10px"}
+        },
+        22: {
+            title: "Charismatic Karma",
+            cost() {
+                return getBuyableAmount(this.layer, this.id).times(1).pow_base(1.2).floor()
+            },
+            canAfford() { return player[this.layer].points.gte(this.cost()) },
+            buy() {
+            player[this.layer].points = player[this.layer].points.sub(this.cost())
+            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            display() {
+                return "Cost: "+format(tmp.k.buyables[22].cost)+"<br>Amount: "+format(getBuyableAmount(this.layer, this.id))
+            },
+            style: {"top": "10px"}
+        },
+    },
+
+    upgrades: {
+        11: {
+            title: "Positive Loyalty",
+            description: "Loyal Viewers are 8x cheaper.",
+            cost: new Decimal(1),
+            currencyDisplayName: "positive karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "11",
+            style: {
+                "right" : "20px"
+            }
+        },
+        13: {
+            title: "Composed Popularity",
+            description: "Popularity gain is raised to the ^1.1th power.",
+            cost: new Decimal(1),
+            currencyDisplayName: "composed karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "12",
+            style: {
+                "left" : "20px"
+            }
+        },
+        31: {
+            title: "Amusing Interactions",
+            description: "Add 0.5 to interactions effect base.",
+            cost: new Decimal(1),
+            currencyDisplayName: "amusing karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "21",
+            style: {
+                "right" : "20px",
+                "top" : "40px",
+            }
+        },
+        33: {
+            title: "Charismatic Fame",
+            description: "Fame gain is raised to the ^1.1th power.",
+            cost: new Decimal(1),
+            currencyDisplayName: "charismatic karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "22",
+            style: {
+                "left" : "20px",
+                "top" : "40px"
+            }
+        },
+    },
+
+    milestones: {
+        0: {
+            requirementDescription: "4 Total Karma",
+            done() {
+                return player.k.total.gte(4)
+            },
+            effectDescription: "Keep fame upgrades on reset."
+        }
+}})
+
 addLayer("a", {
     startData() {
         return {
@@ -962,9 +1175,23 @@ addLayer("a", {
         },
         35: {
             name: "The Ranks of the Universe",
-            tooltip: "Have four rows of fame upgrades.",
+            tooltip: "Have four rows of fame upgrades.<br><br>Reward: 'Interconnection' is based on total interactions.",
             done() {
                 return hasUpgrade('f', 45)
+            }
+        },
+        41: {
+            name: "Karma Chameleon",
+            tooltip: "Do a karma reset.",
+            done() {
+                return player.k.points.gte(1)
+            }
+        },
+        42: {
+            name: "No Negative Karma?",
+            tooltip: "Have 5 positive karma at any one time.",
+            done() {
+                return getBuyableAmount('k', 11).gte(5)
             }
         }
     },

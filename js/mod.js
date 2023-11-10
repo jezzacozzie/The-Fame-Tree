@@ -13,11 +13,18 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.2.5",
-	name: "Balancing and Bug Fixing",
+	num: "0.3.0",
+	name: "Karma Release",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h2>v0.3.0</h2><br>
+		- Added karma.<br>
+		- Added 4 karma types.<br>
+		- Added 4 karma upgrades.<br>
+		- Added 2 achivements.<br>
+		- Added 1 milestone.<br>
+		- Fixed interactions 12 effect bug.<br>
 	<h3>v0.2.5</h3><br>
 		- Redid an upgrade.<br>
 		- Fixed a NaN bug.<br>
@@ -106,6 +113,7 @@ function getPointGen() {
 	if (hasUpgrade('v', 21)) gain = gain.times(upgradeEffect ('v', 21))
 	if (hasUpgrade('v', 23)) gain = gain.pow(upgradeEffect('v', 23))
 	if (hasUpgrade('i', 23)) gain = gain.pow(upgradeEffect('i', 23))
+	if (hasUpgrade('k', 13)) gain = gain.pow(1.1)
 	if (player.v.unlocked) gain = gain.times(tmp.v.effect)
 	return gain
 }
@@ -116,7 +124,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-	`<h3><a>Endgame: 1e30 fame.</a></h3><br><small>the game is balanced up until this point,<br> going past it will risk hyperinflation<br> and you having to hard reset.</small>`
+	`<h3><a>Endgame: All achievements done.</a></h3><br><small>the game is balanced up until this point,<br> going past it will risk hyperinflation<br> and you having to hard reset.<br><br>it is recommended to play without offline progress.</small>`
 ]
 
 // Determines when the game "ends"

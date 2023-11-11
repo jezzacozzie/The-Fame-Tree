@@ -1120,7 +1120,7 @@ addLayer("k", {
                 "height" : "120px",
                 
             },
-            unlocked() {return hasUpgrade('k', 34)},
+            unlocked() {return hasUpgrade('k', 33)},
             effect() {
                 let eff = getBuyableAmount('k', 22)
                 eff = eff.add(1).log(10).add(1)

@@ -68,6 +68,7 @@ addLayer("f", {
                 eff = softcap(eff, new Decimal(1e6), new Decimal(0.1))
                 if (hasUpgrade('f', 44)) eff = eff.times(upgradeEffect('f', 44))
                 if (player.i.unlocked) eff = eff.times(tmp.i.effect)
+                if (hasUpgrade('k', 32)) eff = eff.times(upgradeEffect('k', 32))
                 return eff
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "x" },
@@ -175,7 +176,7 @@ addLayer("f", {
                 return player.points.add(1).pow(0.002)
             },
             effectDisplay() { return "^" + format(upgradeEffect(this.layer, this.id)) },
-            unlocked() { return hasUpgrade('v', 33) }
+            unlocked() {if (hasUpgrade('v', 33) && hasUpgrade('f', 25)) return true}
         },
         32: {
             title: "Viewer Viewer",
@@ -215,7 +216,7 @@ addLayer("f", {
             title: "On The Up",
             description: "Raise 'Interconnection' based on fame.",
             cost: new Decimal(1e22),
-            unlocked() {return hasUpgrade('i', 33)},
+            unlocked() {if (hasUpgrade('i', 33) && hasUpgrade('f', 35)) return true},
             effect() {
                 let eff = player.f.points.add(1).pow(0.005)
                 eff = softcap(eff, new Decimal(1.1), new Decimal(0.2))
@@ -294,6 +295,7 @@ addLayer("v", {
         mult = new Decimal(1)
         if (hasUpgrade('f', 33)) mult = mult.div(250)
         if (hasUpgrade('i', 31)) mult = mult.div(upgradeEffect('i', 31))
+        if (hasUpgrade('k', 34)) mult = mult.div(upgradeEffect('k', 34))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -326,6 +328,7 @@ addLayer("v", {
         if (hasUpgrade('v', 32)) base = base.add(upgradeEffect('v', 32))
         if (hasUpgrade('f', 32)) base = base.add(upgradeEffect('f', 32))
         if (hasUpgrade('i', 22)) base = base.add(upgradeEffect('i', 22))
+        if (hasUpgrade('k', 14)) base = base.pow(upgradeEffect('k', 14))
         return base
     },
     canBuyMax() { return hasMilestone('v', 3) },
@@ -875,6 +878,7 @@ addLayer("k", {
     exponent: 0.1, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
+        if (hasUpgrade('k', 12)) mult = mult.times(upgradeEffect('k', 12))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -1012,6 +1016,24 @@ addLayer("k", {
                 "right" : "20px"
             }
         },
+        12: {
+            title: "Positive Gain",
+            description: "Gain more neutral karma based on positive karma.",
+            cost: new Decimal(10),
+            currencyDisplayName: "positive karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "11",
+            style: {
+                "right" : "20px"
+            },
+            unlocked() {return hasUpgrade('k', 11)},
+            effect() {
+                let eff = getBuyableAmount('k', 11)
+                eff = eff.add(1).log(10).add(1)
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"}
+        },
         13: {
             title: "Composed Popularity",
             description: "Popularity gain is raised to the ^1.1th power.",
@@ -1022,6 +1044,25 @@ addLayer("k", {
             style: {
                 "left" : "20px"
             }
+        },
+        14: {
+            title: "Composed Base",
+            description: "Viewer base is raised by composed karma.",
+            cost: new Decimal(10),
+            currencyDisplayName: "composed karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "12",
+            style: {
+                "left" : "20px"
+            },
+            unlocked() {return hasUpgrade('k', 13)},
+            effect() {
+                let eff = getBuyableAmount('k', 12)
+                eff = eff.add(1).log(10).add(1)
+                eff = softcap(eff, new Decimal(10), new Decimal(0.25))
+                return eff
+            },
+            effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))}
         },
         31: {
             title: "Amusing Interactions",
@@ -1035,6 +1076,25 @@ addLayer("k", {
                 "top" : "40px",
             }
         },
+        32: {
+            title: "Amusing Growth",
+            description: "'Growth' effect is multiplied by amusing karma.",
+            cost: new Decimal(10),
+            currencyDisplayName: "amusing karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "21",
+            style: {
+                "right" : "20px",
+                "top" : "40px",
+            },
+            unlocked() {return hasUpgrade('k', 31)},
+            effect() {
+                let eff = getBuyableAmount('k', 21)
+                eff = eff.add(1).log(10).add(1)
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"}
+        },
         33: {
             title: "Charismatic Fame",
             description: "Fame gain is raised to the ^1.1th power.",
@@ -1047,6 +1107,27 @@ addLayer("k", {
                 "top" : "40px"
             }
         },
+        34: {
+            title: "Charismatic Superstar",
+            description: "Viewer cost is divided based on charismatic karma.",
+            cost: new Decimal(10),
+            currencyDisplayName: "charismatic karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "22",
+            style: {
+                "left" : "20px",
+                "top" : "40px",
+                "height" : "120px",
+                
+            },
+            unlocked() {return hasUpgrade('k', 34)},
+            effect() {
+                let eff = getBuyableAmount('k', 22)
+                eff = eff.add(1).log(10).add(1)
+                return eff
+            },
+            effectDisplay() {return "/"+format(upgradeEffect(this.layer, this.id))}
+        },
     },
 
     milestones: {
@@ -1056,8 +1137,9 @@ addLayer("k", {
                 return player.k.total.gte(4)
             },
             effectDescription: "Keep fame upgrades on reset."
-        }
-}})
+        },
+    }
+})
 
 addLayer("a", {
     startData() {

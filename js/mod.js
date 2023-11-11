@@ -13,11 +13,14 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.3.0",
-	name: "Karma Release",
+	num: "0.3.1",
+	name: "Karma Upgrades",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.3.1</h3><br>
+		- Added 4 karma upgrades.<br>
+		- Balanced karma scaling.<br>
 	<h2>v0.3.0</h2><br>
 		- Added karma.<br>
 		- Added 4 karma types.<br>
@@ -124,7 +127,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-	`<h3><a>Endgame: All achievements done.</a></h3><br><small>the game is balanced up until this point,<br> going past it will risk hyperinflation<br> and you having to hard reset.<br><br>it is recommended to play without offline progress.</small>`
+	`<h3><a>Endgame: 100 neutral karma.</a></h3><br><small>the game is balanced up until this point,<br> going past it will risk hyperinflation<br> and you having to hard reset.<br><br>it is recommended to play without offline progress.</small>`
 ]
 
 // Determines when the game "ends"

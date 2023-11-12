@@ -304,7 +304,7 @@ addLayer("v", {
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        { key: "v", description: "V: Reset for viewers.", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
+        { key: "v", description: "V: Reset for viewers.", onPress() { if (canReset(this.layer)) doReset(this.layer) }, unlocked() {return hasAchievement('a', 35)} },
     ],
     layerShown() { return hasAchievement('a', 15) },
     effect() {
@@ -545,7 +545,7 @@ addLayer("i", {
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        { key: "i", description: "I: Reset for interactions.", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
+        { key: "i", description: "I: Reset for interactions.", onPress() { if (canReset(this.layer)) doReset(this.layer) }, unlocked() {return hasAchievement('a', 25)} },
     ],
     layerShown() { return hasAchievement('a', 25) },
     effect() {
@@ -887,7 +887,7 @@ addLayer("k", {
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        { key: "k", description: "K: Reset for neutral karma.", onPress() { if (canReset(this.layer)) doReset(this.layer) } },
+        { key: "k", description: "K: Reset for neutral karma.", onPress() { if (canReset(this.layer)) doReset(this.layer) }, unlocked() {return hasAchievement('a', 35)} },
     ],
     layerShown() {return hasAchievement('a', 35)},
     branches: ["f"],

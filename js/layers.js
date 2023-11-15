@@ -879,6 +879,10 @@ addLayer("k", {
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
         if (hasUpgrade('k', 12)) mult = mult.times(upgradeEffect('k', 12))
+        if (hasUpgrade('k', 21) && player.i.points.gte(1000)) mult = mult.times(2)
+        if (hasUpgrade('k', 23) && player.v.points.gte(32)) mult = mult.times(2)
+        if (hasUpgrade('k', 41) && player.points.gte(1e35)) mult = mult.times(2)
+        if (hasUpgrade('k', 43) && player.f.points.gte(1e45)) mult = mult.times(2)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -892,6 +896,7 @@ addLayer("k", {
     layerShown() {return hasAchievement('a', 35)},
     branches: ["f"],
     effectDescription() {return "which can be assigned to different karma types."},
+    automate() {if (hasMilestone('k', 2)) buyBuyable('k', 11), buyBuyable('k', 12), buyBuyable('k', 21), buyBuyable('k', 22)},
 
     tabFormat: {
         "Main": {
@@ -951,6 +956,9 @@ addLayer("k", {
             },
             canAfford() { return player[this.layer].points.gte(this.cost()) },
             buy() {
+            if (hasMilestone('k', 1))
+            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1).sub(1))
+            else 
             player[this.layer].points = player[this.layer].points.sub(this.cost())
             setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
@@ -965,8 +973,11 @@ addLayer("k", {
             },
             canAfford() { return player[this.layer].points.gte(this.cost()) },
             buy() {
-            player[this.layer].points = player[this.layer].points.sub(this.cost())
-            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                if (hasMilestone('k', 1))
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1).sub(1))
+                else 
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             display() {
                 return "Cost: "+format(tmp.k.buyables[12].cost)+"<br>Amount: "+format(getBuyableAmount(this.layer, this.id))
@@ -979,8 +990,11 @@ addLayer("k", {
             },
             canAfford() { return player[this.layer].points.gte(this.cost()) },
             buy() {
-            player[this.layer].points = player[this.layer].points.sub(this.cost())
-            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                if (hasMilestone('k', 1))
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1).sub(1))
+                else 
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             display() {
                 return "Cost: "+format(tmp.k.buyables[21].cost)+"<br>Amount: "+format(getBuyableAmount(this.layer, this.id))
@@ -994,8 +1008,11 @@ addLayer("k", {
             },
             canAfford() { return player[this.layer].points.gte(this.cost()) },
             buy() {
-            player[this.layer].points = player[this.layer].points.sub(this.cost())
-            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                if (hasMilestone('k', 1))
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1).sub(1))
+                else 
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             display() {
                 return "Cost: "+format(tmp.k.buyables[22].cost)+"<br>Amount: "+format(getBuyableAmount(this.layer, this.id))
@@ -1064,6 +1081,31 @@ addLayer("k", {
             },
             effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))}
         },
+        21: {
+            title: "Positive Benchmark",
+            description: "Double neutral karma gain when interactions are greater than 1,000.",
+            cost: new Decimal(30),
+            currencyDisplayName: "positive karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "11",
+            style: {
+                "right" : "20px",
+                "height" : "120px"
+            },
+            unlocked() {return hasUpgrade('k', 12)},
+        },
+        23: {
+            title: "Composed Benchmark",
+            description: "Double neutral karma gain when viewers are greater than 32.",
+            cost: new Decimal(30),
+            currencyDisplayName: "composed karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "12",
+            style: {
+                "left" : "20px",
+                "height" : "120px"
+            },
+        },
         31: {
             title: "Amusing Interactions",
             description: "Add 0.5 to interactions effect base.",
@@ -1128,15 +1170,55 @@ addLayer("k", {
             },
             effectDisplay() {return "/"+format(upgradeEffect(this.layer, this.id))}
         },
+        41: {
+            title: "Amusing Benchmark",
+            description: "Double neutral karma gain when popularity is greater than 1e35.",
+            cost: new Decimal(30),
+            currencyDisplayName: "amusing karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "21",
+            style: {
+                "right" : "20px",
+                "top" : "40px",
+                "height" : "120px",
+            }
+        },
+        43: {
+            title: "Charismatic Benchmark",
+            description: "Double neutral karma gain when fame is greater than 1e45.",
+            cost: new Decimal(30),
+            currencyDisplayName: "charismatic karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "22",
+            style: {
+                "left" : "20px",
+                "top" : "40px",
+                "height" : "120px"
+            }
+        },
     },
 
     milestones: {
         0: {
-            requirementDescription: "4 Total Karma",
+            requirementDescription: "4 Total Neutral Karma",
             done() {
                 return player.k.total.gte(4)
             },
             effectDescription: "Keep fame upgrades on reset."
+        },
+        1: {
+            requirementDescription: "300 Total Neutral Karma",
+            done() {
+                return player.k.total.gte(300)
+            },
+            effectDescription: "Karma buyables cost nothing."
+        },
+        2: {
+            requirementDescription: "1500 Total Neutral Karma",
+            done() {
+                return player.k.total.gte(1500)
+            },
+            effectDescription: "Automate karma buyables."
         },
     }
 })
@@ -1274,6 +1356,13 @@ addLayer("a", {
             tooltip: "Have 5 positive karma at any one time.",
             done() {
                 return getBuyableAmount('k', 11).gte(5)
+            }
+        },
+        43: {
+            name: "Threshold? Broken.",
+            tooltip: "Have all of the thresholds for all the 3rd karma upgrades.",
+            done() {
+                return player.points.gte(1e35) && player.f.points.gte(1e45) && player.v.points.gte(32) && player.i.points.gte(1000)
             }
         }
     },

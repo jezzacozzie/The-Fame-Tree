@@ -13,11 +13,17 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.3.2",
-	name: "Karma Thresholds",
+	num: "0.3.3",
+	name: "Karma Upgrades",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.3.3</h3><br>
+		- Added 4 karma upgrades.<br>
+		- Added 1 milestone.<br>
+		- Added 1 achievement.<br>
+		- Added layer effect colours.<br>
+		- Fixed bugs.<br>
 	<h3>v0.3.2</h3><br>
 		- Added 4 karma upgrades.<br>
 		- Added 2 milestones.<br>
@@ -114,13 +120,17 @@ function getPointGen() {
 
 	let gain = new Decimal(0)
 	if (hasUpgrade('f', 11)) gain = gain.add(0.1)
-	if (hasUpgrade('f', 12)) gain = gain.times(upgradeEffect ('f', 12))
-	if (hasUpgrade('f', 14)) gain = gain.times(upgradeEffect ('f', 14))
+	if (hasUpgrade('f', 12)) gain = gain.times(upgradeEffect('f', 12))
+	if (hasUpgrade('f', 14)) gain = gain.times(upgradeEffect('f', 14))
 	if (hasUpgrade('f', 21)) gain = gain.add(0.1)
-	if (hasUpgrade('v', 21)) gain = gain.times(upgradeEffect ('v', 21))
+	if (hasUpgrade('v', 21)) gain = gain.times(upgradeEffect('v', 21))
 	if (hasUpgrade('v', 23)) gain = gain.pow(upgradeEffect('v', 23))
 	if (hasUpgrade('i', 23)) gain = gain.pow(upgradeEffect('i', 23))
 	if (hasUpgrade('k', 13)) gain = gain.pow(1.1)
+	if (hasUpgrade('k', 22)) gain = gain.times(upgradeEffect('k', 22))
+	if (hasUpgrade('k', 24)) gain = gain.times(upgradeEffect('k', 24))
+	if (hasUpgrade('k', 42)) gain = gain.times(upgradeEffect('k', 42))
+	if (hasUpgrade('k', 44)) gain = gain.times(upgradeEffect('k', 44))
 	if (player.v.unlocked) gain = gain.times(tmp.v.effect)
 	return gain
 }
@@ -131,7 +141,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-	`<h3><a>Endgame: 1500 neutral karma.</a></h3><br><small>the game is balanced up until this point,<br> going past it will risk hyperinflation<br> and you having to hard reset.<br><br>it is recommended to play without offline progress.</small>`
+	`<h3><a>Endgame: 10000 neutral karma.</a></h3><br><small>the game is balanced up until this point,<br> going past it will risk hyperinflation<br> and you having to hard reset.<br><br>it is recommended to play without offline progress.</small>`
 ]
 
 // Determines when the game "ends"

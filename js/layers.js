@@ -304,7 +304,7 @@ addLayer("v", {
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        { key: "v", description: "V: Reset for viewers.", onPress() { if (canReset(this.layer)) doReset(this.layer) }, unlocked() {return hasAchievement('a', 35)} },
+        { key: "v", description: "V: Reset for viewers.", onPress() { if (canReset(this.layer)) doReset(this.layer) }, unlocked() {return hasAchievement('a', 15)} },
     ],
     layerShown() { return hasAchievement('a', 15) },
     effect() {
@@ -320,7 +320,7 @@ addLayer("v", {
         return eff
     },
     effectDescription() {
-        dis = "which boost popularity gain by " + format(tmp.v.effect) + "x"
+        dis = "which boost popularity gain by <font color=5440C4><h2>" + format(tmp.v.effect) + "x</h2></font color=5440C4>"
         return dis
     },
     effectBase() {
@@ -500,7 +500,7 @@ addLayer("v", {
                 return getBuyableAmount(this.layer, this.id).times(1.5);
             },
             display() {
-                return "Multiply views effect by 1.50x<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
+                return "Multiply viewers effect by 1.50x<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
                     "<br> Cost: " + format(tmp.v.buyables[11].cost) + " viewers<br>Effect: " + format(tmp.v.buyables[11].effect) + "x"
             },
             buy() {
@@ -527,7 +527,11 @@ addLayer("i", {
         }
     },
     color: "#CF4FE1",
-    requires: new Decimal(1e15), // Can be a function that takes requirement increases into account
+    requires() {
+        let req = new Decimal(1e15)
+        if (hasAchievement ('a', 44)) req = 1e3
+        return req
+        }, // Can be a function that takes requirement increases into account
     resource: "interactions", // Name of prestige currency
     baseResource: "fame", // Name of resource prestige is based on
     baseAmount() { return player.f.points }, // Get the current amount of baseResource
@@ -555,7 +559,7 @@ addLayer("i", {
         return eff
     },
     effectDescription() {
-        dis = "which boosts 'Growth' multiplier after first softcap by " + format(tmp.i.effect) + "x"
+        dis = "which boosts 'Growth' multiplier after first softcap by <font color=CF4FE1><h2>" +format(tmp.i.effect) + "x</h2></font color=CF4FE1>"
         return dis
     },
     effectBase() {
@@ -897,6 +901,7 @@ addLayer("k", {
     branches: ["f"],
     effectDescription() {return "which can be assigned to different karma types."},
     automate() {if (hasMilestone('k', 2)) buyBuyable('k', 11), buyBuyable('k', 12), buyBuyable('k', 21), buyBuyable('k', 22)},
+    passiveGeneration() {return hasMilestone('k', 3) && player.k.points.lte(9975) ? 0.25: hasMilestone('k', 3) && player.k.points.lte(10000) ? 0.01:0},
 
     tabFormat: {
         "Main": {
@@ -1094,6 +1099,27 @@ addLayer("k", {
             },
             unlocked() {return hasUpgrade('k', 12)},
         },
+        22: {
+            title: "Positive Advertisements",
+            description: "Total advertisements multiply popularity gain.",
+            cost: new Decimal(50),
+            currencyDisplayName: "positive karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "11",
+            style: {
+                "right" : "20px",
+                "height" : "120px"
+            },
+            unlocked() {return hasUpgrade('k', 21)},
+            effect() {
+                let eff = getBuyableAmount('i', 11)
+                eff = eff.add(getBuyableAmount('i', 12))
+                eff = eff.add(getBuyableAmount('i', 13))
+                eff = eff.add(1).pow(1.2)
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"}
+            },
         23: {
             title: "Composed Benchmark",
             description: "Double neutral karma gain when viewers are greater than 32.",
@@ -1101,10 +1127,30 @@ addLayer("k", {
             currencyDisplayName: "composed karma",
             currencyLocation() {return player[this.layer].buyables},
             currencyInternalName: "12",
+            unlocked() {return hasUpgrade('k', 14)},
             style: {
                 "left" : "20px",
                 "height" : "120px"
             },
+        },
+        24: {
+            title: "Composed Synergy",
+            description: "'Recognition' multiplies popularity at log10 rate.",
+            cost: new Decimal(50),
+            currencyDisplayName: "composed karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "12",
+            unlocked() {return hasUpgrade('k', 23)},
+            style: {
+                "left" : "20px",
+                "height" : "120px"
+            },
+            effect() {
+                let eff = tmp.f.upgrades[13].effect
+                eff = eff.add(0.1).log(10).add(0.1)
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"}
         },
         31: {
             title: "Amusing Interactions",
@@ -1177,11 +1223,32 @@ addLayer("k", {
             currencyDisplayName: "amusing karma",
             currencyLocation() {return player[this.layer].buyables},
             currencyInternalName: "21",
+            unlocked() {return hasUpgrade('k', 32)},
             style: {
                 "right" : "20px",
                 "top" : "40px",
                 "height" : "120px",
             }
+        },
+        42: {
+            title: "Amusing Squares",
+            description: "'Fame^2' multiplies popularity at log10 rate.",
+            cost: new Decimal(50),
+            currencyDisplayName: "amusing karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "21",
+            unlocked() {return hasUpgrade('k', 41)},
+            style: {
+                "right" : "20px",
+                "top" : "40px",
+                "height" : "120px",
+            },
+            effect() {
+                let eff = tmp.f.upgrades[15].effect
+                eff = eff.add(0.1).log(10).add(0.1)
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"}
         },
         43: {
             title: "Charismatic Benchmark",
@@ -1190,11 +1257,32 @@ addLayer("k", {
             currencyDisplayName: "charismatic karma",
             currencyLocation() {return player[this.layer].buyables},
             currencyInternalName: "22",
+            unlocked() {return hasUpgrade('k', 34)},
             style: {
                 "left" : "20px",
                 "top" : "40px",
                 "height" : "120px"
             }
+        },
+        44: {
+            title: "Charismatic Charisma",
+            description: "Effect of all charisma upgrades multiplies popularity.",
+            cost: new Decimal(50),
+            currencyDisplayName: "charismatic karma",
+            currencyLocation() {return player[this.layer].buyables},
+            currencyInternalName: "22",
+            unlocked() {return hasUpgrade('k', 43)},
+            style: {
+                "left" : "20px",
+                "top" : "40px",
+                "height" : "120px"
+            },
+            effect() {
+                let eff = tmp.k.upgrades[34].effect
+                eff = eff.times(2).pow(1.1)
+                return eff
+            },
+            effectDisplay() {return format(upgradeEffect(this.layer, this.id))+"x"}
         },
     },
 
@@ -1220,6 +1308,13 @@ addLayer("k", {
             },
             effectDescription: "Automate karma buyables."
         },
+        3: {
+            requirementDescription: "2500 Total Neutral Karma",
+            done() {
+                return player.k.total.gte(2500)
+            },
+            effectDescription: "Generate 25% of neutral karma gain per second until neutral karma > 10000."
+        }
     }
 })
 
@@ -1363,6 +1458,13 @@ addLayer("a", {
             tooltip: "Have all of the thresholds for all the 3rd karma upgrades.",
             done() {
                 return player.points.gte(1e35) && player.f.points.gte(1e45) && player.v.points.gte(32) && player.i.points.gte(1000)
+            }
+        },
+        44: {
+            name: "ULTIMATE RIZZ",
+            tooltip: "Have all the charisma upgrades.<br><br>Reward: Interactions start cost is now 1,000 fame.",
+            done() {
+                return hasUpgrade('k', 44)
             }
         }
     },

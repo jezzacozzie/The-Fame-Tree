@@ -583,6 +583,9 @@ addLayer("v", {
             },
             canAfford() {
                 return player[this.layer].points.gte(this.cost())
+            },
+            unlocked() {
+                return hasUpgrade('k', 51)
             }
         },
     },

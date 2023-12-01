@@ -296,7 +296,7 @@ addLayer("f", {
         },
         53: {
             title: "Out of Thick Air",
-            description: "Below upgrade is based on total interactions.",
+            description: "Above upgrade is based on total interactions.",
             cost: new Decimal(1e69),
             unlocked() {return hasUpgrade('f', 52)},
         },

@@ -24,7 +24,6 @@ addLayer("f", {
         if (hasUpgrade('v', 13)) mult = mult.pow(1.05)
         if (hasUpgrade('i', 13)) mult = mult.times(upgradeEffect('i', 13))
         if (hasUpgrade('k', 33)) mult = mult.pow(1.1)
-        mult = softcap(mult, new Decimal(1e75), new Decimal(0.5))
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -48,9 +47,8 @@ addLayer("f", {
     passiveGeneration() {
         return hasMilestone('v', 2) ? 1 : hasMilestone('v', 1) ? 0.1 : 0
     },
-
     upgrades: {
-        rows: 3,
+        rows: 5,
         columns: 5,
         11: {
             title: "Exist",
@@ -389,6 +387,10 @@ addLayer("v", {
                     function () { return 'You have ' + formatWhole(player.v.best) + ' best viewers.' },
                     {}],
                 "blank",
+                ["display-text",
+                    function () { if (!hasAchievement('a', 22)) return 'To progress better, go into the "Buyables" tab and purchase a loyal viewer.' },
+                    {}],
+                    "blank",
                 "prestige-button",
                 "blank",
                 "upgrades",

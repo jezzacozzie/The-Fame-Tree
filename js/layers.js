@@ -21,6 +21,7 @@ addLayer("f", {
         if (hasUpgrade('f', 15)) mult = mult.times(upgradeEffect('f', 15))
         if (hasUpgrade('f', 22)) mult = mult.times(1.1)
         if (hasUpgrade('v', 11)) mult = mult.times(upgradeEffect('v', 11))
+        if (hasAchievement('fo', 23)) mult = mult.times(achievementEffect('fo', 23))
         if (hasUpgrade('v', 13)) mult = mult.pow(1.05)
         if (hasUpgrade('i', 13)) mult = mult.times(upgradeEffect('i', 13))
         if (hasUpgrade('k', 33)) mult = mult.pow(1.1)
@@ -42,6 +43,8 @@ addLayer("f", {
         if (hasMilestone('v', 0) && resettingLayer == "v") keep.push("upgrades")
         if (hasMilestone('i', 0) && resettingLayer == "i") keep.push("upgrades")
         if (hasMilestone('k', 0) && resettingLayer == "k") keep.push("upgrades")
+        if (hasAchievement('fo', 14) && resettingLayer == "fo") keep.push("upgrades")
+        if (hasAchievement('s', 14) && resettingLayer == "s") keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
     },
     passiveGeneration() {
@@ -64,11 +67,14 @@ addLayer("f", {
                 if (hasUpgrade('f', 23)) eff = eff.add(upgradeEffect('f', 23))
                 if (hasUpgrade('v', 13)) eff = eff.add(upgradeEffect('v', 13))
                 if (hasUpgrade('f', 34)) eff = eff.add(1e6)
+                if (player.s.unlocked) eff = eff.times(tmp.s.effect)
                 if (!hasUpgrade('f', 52))eff = softcap(eff, new Decimal(1e6), new Decimal(0.1))
                 if (hasUpgrade('f', 52)) eff = softcap(eff, new Decimal(1e6), new Decimal(0.2))
+                if (player.s.unlocked) eff = eff.times(tmp.s.effect.div(4.5))
                 if (hasUpgrade('f', 44)) eff = eff.times(upgradeEffect('f', 44))
                 if (player.i.unlocked) eff = eff.times(tmp.i.effect)
                 if (hasUpgrade('k', 32)) eff = eff.times(upgradeEffect('k', 32))
+                eff = softcap(eff, new Decimal(2e15), new Decimal(0.2))
                 return eff
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "x" },
@@ -178,7 +184,7 @@ addLayer("f", {
                 return player.points.add(1).pow(0.002)
             },
             effectDisplay() { return "^" + format(upgradeEffect(this.layer, this.id)) },
-            unlocked() {if (hasUpgrade('v', 33) && hasUpgrade('f', 25)) return true}
+            unlocked() {if ((hasUpgrade('v', 33) && hasUpgrade('f', 25)) || (hasAchievement('fo', 14) || hasAchievement('s', 14))) return true}
         },
         32: {
             title: "Viewer Viewer",
@@ -218,7 +224,7 @@ addLayer("f", {
             title: "On The Up",
             description: "Raise 'Interconnection' based on fame.",
             cost: new Decimal(1e22),
-            unlocked() {if (hasUpgrade('i', 33) && hasUpgrade('f', 35)) return true},
+            unlocked() {if ((hasUpgrade('i', 33) && hasUpgrade('f', 35)) || hasAchievement('fo', 14) || hasAchievement('s', 14)) return true},
             effect() {
                 let eff = player.f.points.add(1).pow(0.005)
                 eff = softcap(eff, new Decimal(1.1), new Decimal(0.2))
@@ -240,6 +246,7 @@ addLayer("f", {
             effect() {
                 let eff = player.i.best
                 if (hasUpgrade('f', 53)) eff = player.i.total
+                eff = softcap(eff, new Decimal(5000), new Decimal(0))
                 return eff
             },
             effectDisplay() {return "+"+format(upgradeEffect(this.layer, this.id))},
@@ -279,7 +286,7 @@ addLayer("f", {
             title: "Cheap Karma",
             description: "Make karma buyables cheaper based on fame",
             cost: new Decimal(1e64),
-            unlocked() {return hasUpgrade ('k', 52) && hasUpgrade ('f', 45)},
+            unlocked() {if ((hasUpgrade ('k', 52) && hasUpgrade ('f', 45)) || hasAchievement('fo', 14) || hasAchievement('s', 14)) return true},
             effect() {
                 let eff = player.f.points.add(1).log(2).add(1)
                 return eff
@@ -308,7 +315,7 @@ addLayer("f", {
         },
         55: {
             title: "Fame^6",
-            description: "Increase Fame^5 Effect by fame.",
+            description: "Increase Fame^5 effect by fame.",
             cost: new Decimal(1e73),
             unlocked() {return hasUpgrade ('f', 54)},
             effect() {return player.f.points.add(1).log(10).pow(0.2).add(1)},
@@ -342,6 +349,7 @@ addLayer("v", {
         if (hasUpgrade('f', 33)) mult = mult.div(250)
         if (hasUpgrade('i', 31)) mult = mult.div(upgradeEffect('i', 31))
         if (hasUpgrade('k', 34)) mult = mult.div(upgradeEffect('k', 34))
+        if (hasAchievement('a', 51) && player.v.points.lte(15)) mult = mult.div(1.5)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -359,10 +367,12 @@ addLayer("v", {
         if (hasUpgrade('v', 22)) eff = eff.add(50)
         if (hasUpgrade('f', 43)) eff = eff.add(upgradeEffect('f', 43))
         eff = eff.times(tmp.v.buyables[11].effect)
-        eff = eff.add(1)
         eff = softcap(eff, new Decimal(1e6), new Decimal(0.5))
         eff = softcap(eff, new Decimal(1e7), new Decimal(0.25))
+        if (player.fo.unlocked) eff = eff.times(tmp.fo.effect)
         eff = softcap(eff, new Decimal(1e8), new Decimal(0.125))
+        eff = softcap(eff, new Decimal(1e9), new Decimal(0.0625))
+        eff = eff.add(1)
         return eff
     },
     effectDescription() {
@@ -378,6 +388,16 @@ addLayer("v", {
         return base
     },
     canBuyMax() { return hasMilestone('v', 3) },
+    doReset(resettingLayer) {
+        let keep = [];
+        if (hasAchievement('fo', 12) && resettingLayer == "fo") keep.push("milestones")
+        if (hasAchievement('fo', 15) && resettingLayer == "fo") keep.push("buyables")
+        if (hasAchievement('fo', 24) && resettingLayer == "fo") keep.push("upgrades")
+        if (hasAchievement('s', 12) && resettingLayer == "s") keep.push("milestones")
+        if (hasAchievement('s', 15) && resettingLayer == "s") keep.push("buyables")
+        if (hasAchievement('s', 24) && resettingLayer == "s") keep.push("upgrades")
+        if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
+    },
 
     tabFormat: {
         "Main": {
@@ -564,7 +584,7 @@ addLayer("v", {
             },
             canAfford() {
                 return player[this.layer].points.gte(this.cost())
-            }
+            },
         },
         12: {
             cost(x) {
@@ -573,7 +593,7 @@ addLayer("v", {
             },
             title: "Royal Viewers",
             effect() {
-                return player.v.points.pow(0.5).pow(getBuyableAmount(this.layer, this.id).pow(1.05))
+                return player.v.points.pow(0.5).pow(getBuyableAmount(this.layer, this.id).pow(1.05)).add(1)
             },
             display() {
                 return "Popularity is multiplied by viewers and raised by amount of buyable.<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
@@ -587,7 +607,7 @@ addLayer("v", {
                 return player[this.layer].points.gte(this.cost())
             },
             unlocked() {
-                return hasUpgrade('k', 51)
+                return hasUpgrade('k', 51) || hasAchievement('fo', 15) || hasAchievement('s', 15)
             }
         },
     },
@@ -608,7 +628,7 @@ addLayer("i", {
     color: "#CF4FE1",
     requires() {
         let req = new Decimal(1e15)
-        if (hasAchievement ('a', 44) && hasUpgrade('k', 44))  req = 1e3
+        if (hasAchievement ('a', 44) && hasUpgrade('k', 44) && player.i.points.lte(3600))  req = 1e3
         return req
         }, // Can be a function that takes requirement increases into account
     resource: "interactions", // Name of prestige currency
@@ -620,6 +640,8 @@ addLayer("i", {
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
         mult = mult.times(tmp.i.buyables[11].effect)
+        if (hasAchievement('fo', 11) && player.fo.unlockOrder<=0) mult = mult.times(2)
+        if (hasAchievement('s', 11) && player.s.unlockOrder<=0) mult = mult.times(2)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -633,8 +655,10 @@ addLayer("i", {
     layerShown() { return hasAchievement('a', 25) },
     effect() {
         let eff = new Decimal(1)
-        eff = eff.add(tmp.i.effectBase)
-        if (hasUpgrade('i', 12)) eff = eff.add(upgradeEffect('i', 12))
+        eff = eff.times(tmp.i.effectBase)
+        if (hasUpgrade('i', 12) && !hasAchievement('fo', 11)) eff = eff.add(upgradeEffect('i', 12))
+        if (hasUpgrade('i', 12) && hasAchievement('fo', 11)) eff = eff.times(upgradeEffect('i', 12)).add(1)
+        eff = softcap(eff, new Decimal(400), new Decimal(0.1))
         return eff
     },
     effectDescription() {
@@ -648,6 +672,16 @@ addLayer("i", {
     },
     passiveGeneration() {
         return hasMilestone('i', 1) ? 0.01:0
+    },
+    doReset(resettingLayer) {
+        let keep = [];
+        if (hasAchievement('fo', 12) && resettingLayer == "fo") keep.push("milestones")
+        if (hasAchievement('fo', 13) && resettingLayer == "fo") keep.push("buyables")
+        if (hasAchievement('fo', 22) && resettingLayer == "fo") keep.push("upgrades")
+        if (hasAchievement('s', 12) && resettingLayer == "s") keep.push("milestones")
+        if (hasAchievement('s', 13) && resettingLayer == "s") keep.push("buyables")
+        if (hasAchievement('s', 22) && resettingLayer == "s") keep.push("upgrades")
+        if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
     },
 
     tabFormat: {
@@ -722,7 +756,10 @@ addLayer("i", {
                 eff = softcap(eff, new Decimal(100), new Decimal(0.75))
                 return eff
             },
-            effectDisplay() { return "+" + format(upgradeEffect(this.layer, this.id)) },
+            effectDisplay() {
+                 let dis = "+" + format(upgradeEffect(this.layer, this.id))
+                 return dis
+            },
             unlocked() { return hasUpgrade('i', 11) }
         },
         13: {
@@ -742,7 +779,7 @@ addLayer("i", {
             title: "Interconnected",
             description: "'Interconnection' is based on best interactions.",
             cost: new Decimal(10),
-            unlocked() {return hasUpgrade('i', 13), hasAchievement('a', 32) }
+            unlocked() {return hasUpgrade('i', 13) && hasAchievement('a', 32) }
         },
         22: {
             title: "Inter-Base",
@@ -946,7 +983,7 @@ addLayer("k", {
     position: 2, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
     startData() {
         return {
-            unlocked: true,
+            unlocked: false,
             points: new Decimal(0),
             best: new Decimal(0),
             total: new Decimal(0),
@@ -980,7 +1017,15 @@ addLayer("k", {
     branches: ["f"],
     effectDescription() {return "which can be assigned to different karma types."},
     automate() {if (hasMilestone('k', 2)) buyBuyable('k', 11), buyBuyable('k', 12), buyBuyable('k', 21), buyBuyable('k', 22)},
-    passiveGeneration() {return hasMilestone('k', 3) && player.k.points.lte(9975) ? 0.25: hasMilestone('k', 3) && player.k.points.lte(10000) ? 0.01:0},
+    passiveGeneration() {return (hasAchievement('fo', 24) || hasAchievement('s', 24)) && player.k.points.lte(45000) && hasMilestone('k', 3) ? 0.25: hasMilestone('k', 3) && player.k.points.lte(9975) ? 0.25: hasMilestone('k', 3) && player.k.points.lte(10000) ? 0.01:0},
+    doReset(resettingLayer) {
+        let keep = [];
+        if (hasAchievement('fo', 12) && resettingLayer == "fo") keep.push("milestones")
+        if (hasAchievement('fo', 24) && resettingLayer == "fo") keep.push("upgrades")
+        if (hasAchievement('s', 12) && resettingLayer == "s") keep.push("milestones")
+        if (hasAchievement('s', 24) && resettingLayer == "s") keep.push("upgrades")
+        if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
+    },
 
     tabFormat: {
         "Main": {
@@ -1170,7 +1215,7 @@ addLayer("k", {
             effect() {
                 let eff = getBuyableAmount('k', 12)
                 eff = eff.add(1).log(10).add(1)
-                eff = softcap(eff, new Decimal(10), new Decimal(0.25))
+                eff = softcap(eff, new Decimal(3.5), new Decimal(0.25))
                 return eff
             },
             effectDisplay() {return "^"+format(upgradeEffect(this.layer, this.id))}
@@ -1427,6 +1472,458 @@ addLayer("k", {
     }
 })
 
+addLayer("fo", {
+    name: "followers", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "FO", // This appears on the layer's node. Default is the id with the first letter capitalized
+    position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    startData() {
+        return {
+            unlocked: false,
+            points: new Decimal(0),
+            best: new Decimal(0),
+            total: new Decimal(0),
+            unlockOrder: 0
+        }
+    },
+    color: "#162C7D",
+    requires() {return new Decimal((player.fo.unlockOrder>0 && !hasAchievement('fo', 25))?5e88:1e75)}, // Can be a function that takes requirement increases into account
+    resource: "followers", // Name of prestige currenc
+    baseResource: "fame", // Name of resource prestige is based on
+    baseAmount() { return player.f.points }, // Get the current amount of baseResource
+    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    exponent: 0.08, // Prestige currency exponent
+    gainMult() { // Calculate the multiplier for main currency from bonuses
+        mult = new Decimal(1)
+        if (hasAchievement('fo', 21)) mult = mult.times(achievementEffect('fo', 21))
+        return mult
+    },
+    gainExp() { // Calculate the exponent on main currency from bonuses
+        exp = new Decimal(1)
+        return exp
+    },
+    effect() {
+        let eff = new Decimal(1)
+        eff = eff.times(player.fo.points)
+        eff = eff.add(1).pow(49).log(2.025).add(1)
+        return eff
+    },
+    effectDescription() {
+        let dis = "which multiplies viewer effect after 2 softcaps by <font color=162C7D><h2>"+format(tmp.fo.effect)+ "x</h2></font color=162C7D>"
+        return dis
+    },
+    row: 2, // Row the layer is in on the tree (0 is the first row)
+    hotkeys: [
+        { key: "o", description: "O: Reset for followers.", onPress() { if (canReset(this.layer)) doReset(this.layer) }, unlocked() {return player.fo.unlocked} },
+    ],
+    layerShown() {return (hasAchievement ('a', 45) && !player.s.unlocked) || (player.s.points.gte(100) || hasAchievement('a', 53))},
+    branches: ["i", "v"],
+    increaseUnlockOrder: ["s"],
+    nodeStyle() {return {"color" : "rgba(255,255,255,0.75)"}},
+    componentStyles() { return {
+        "prestige-button": {
+            "color" : "rgba(255, 255, 255, 0.75)",
+        }}},
+    
+
+    tabFormat: {
+            "Main": {
+                content: [
+                    "main-display",
+                    "prestige-button",
+                    "blank",
+                    ["display-text",
+                        function () { return 'You have ' + formatWhole(player.fo.best) + ' best followers.' },
+                        {}],
+                    ["display-text",
+                        function () { return 'You have ' + formatWhole(player.fo.total) + ' total followers.' },
+                        {}],
+                    "blank",
+                    ["display-text",
+                        function () { return "You have<font color=162C7D><h2> "+format(tmp.fo.buyables[31].cost)+ "</h2></font color=162C7D> Achievement Points, translating to a<font color=162C7D><h2> "+format(tmp.fo.buyables[31].effect)+"x</h2></font color=162C7D> boost to popularity."},
+                        {}],
+                    "blank",
+                    "achievements",
+                    "blank",
+                    ["bar" , "followerBar"]
+                ]
+            },
+            "Short Videos": {
+                content: [
+                    "main-display",
+                    "prestige-button",
+                    "blank",
+                    ["display-text",
+                        function () { return 'You have ' + formatWhole(player.fo.best) + ' best followers.' },
+                        {}],
+                    ["display-text",
+                        function () { return 'You have ' + formatWhole(player.fo.total) + ' total followers.' },
+                        {}],
+                    "blank",
+                    "blank",
+                    "blank"
+                ],
+                unlocked() {return false}
+            }
+    },
+
+    achievements: {
+        11: {
+            name: "1 Total<br>Follower",
+            tooltip: "Interactions x2. (only works if followers are first)",
+            done() {return player.fo.total.gte(1)}
+        },
+        12: {
+            name: "2 Total Followers",
+            tooltip: "Keep all row 2 milestones on reset.",
+            done() {return player.fo.total.gte(2)},
+            unlocked() {return hasAchievement('fo', 11)},
+        },
+        13: {
+            name: "3 Total Followers",
+            tooltip: "Keep advertisements on reset (doesn't include bars).",
+            done() {return player.fo.total.gte(3)},
+            unlocked() {return hasAchievement('fo', 12)},
+        },
+        14: {
+            name: "5 Total Followers",
+            tooltip: "Keep fame upgrades on reset.",
+            done() {return player.fo.total.gte(5)},
+            unlocked() {return hasAchievement('fo', 13)}
+        },
+        15: {
+            name: "7 Total Followers",
+            tooltip: "Keep viewer buyables on reset.",
+            done() {return player.fo.total.gte(7)},
+            unlocked() {return hasAchievement('fo', 14)}
+        },
+        21: {
+            name: "10 Total Followers",
+            tooltip() {
+                let dis = "Popularity boosts followers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"
+                if (hasAchievement('fo', 25)) dis = "Popularity boosts followers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"+"<br><br>This effect boosts popularity at 80 followers. Currently: "+format(achievementEffect('fo', 21).times(10))+"x"
+                return dis
+            },
+            done() {return player.fo.total.gte(10)},
+            unlocked() {return hasAchievement('fo', 15)},
+            effect() {
+                let eff = player.points.add(1).pow(0.0045)
+                return eff
+            }
+        },
+        22: {
+            name: "15 Total Followers",
+            tooltip: "Keep interactions upgrades on reset.",
+            done() {return player.fo.total.gte(15)},
+            unlocked() {return hasAchievement('fo', 21)}
+        },
+        23: {
+            name: "24 Total Followers",
+            tooltip() {
+                let dis = "Followers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x"
+                if (hasAchievement('fo', 25)) dis = "Followers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x<br><br>This effect's formula is improved at 65 followers."
+                return dis
+            },
+            done() {return player.fo.total.gte(24)},
+            unlocked() {return hasAchievement('fo', 22)},
+            effect() {
+                let eff = tmp.fo.effect.pow(0.625)
+                if (player.fo.points.gte(65)) eff = tmp.fo.effect.add(1).pow(9).log(2).add(1)
+                return eff
+            }
+        },
+        24: {
+            name: "36 Total Followers",
+            tooltip: "Keep viewer and karma upgrades on reset. Neutral Karma generation cap is now 45,000.",
+            done() {return player.fo.total.gte(36)},
+            unlocked() {return hasAchievement('fo', 23)}
+        },
+        25: {
+            name: "50 Total Followers",
+            tooltip() {return "Followers act as if you chose them first & total achievement points are multiplied by followers. Currently: "+format(achievementEffect(this.layer,this.id))+"x"},
+            done() {return player.fo.total.gte(50)},
+            unlocked() {return hasAchievement('fo', 24)},
+            effect() {
+                let eff = new Decimal(1)
+                eff = eff.times(player.fo.points)
+                eff = eff.add(1).pow(0.1).log(2).add(1)
+                return eff
+            }
+        }
+    },
+
+    buyables: {
+        31: {
+            title: "achievement point lol",
+            display() {return "ap: "+format(tmp.fo.buyables[31].cost)+"<br>eff: "+format(tmp.fo.buyables[31].effect)},
+            cost() {
+                let cost = new Decimal(1)
+                cost = cost.times(player.fo.achievements.length)
+                if (hasAchievement('fo', 25)) cost = cost.times(achievementEffect('fo', 25))
+                return cost
+            },
+            effect() {
+                let eff = tmp.fo.buyables[31].cost
+                eff = eff.add(1).pow(27.28).log(2).add(1)
+                return eff
+            },
+            buy() {
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+                return player[this.layer].points.gte(this.cost())
+            },
+
+        }
+    },
+
+    bars: {
+        followerBar: {
+            direction: RIGHT,
+            width: 650,
+            height: 40,
+            fillStyle: { 'background-color': "#162C7D" },
+            borderStyle() { return { "border-color": "#162C7D" } },
+            progress() {
+                let prog = player.fo.points.div(100)
+                if (player.fo.points.gte(100)) prog = 1
+                return prog
+            },
+            display() {
+                if (player.fo.points.lte(99))
+                    return "Unlock another layer: " + format(player.fo.points) + "/100 followers."
+                else
+                    return "You have unlocked Subscribers."
+            },
+            unlocked() { return hasAchievement('fo', 25)}
+        },
+    }
+})
+
+addLayer("s", {
+    name: "subscribers", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "S", // This appears on the layer's node. Default is the id with the first letter capitalized
+    position: 1, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
+    startData() {
+        return {
+            unlocked: false,
+            points: new Decimal(0),
+            best: new Decimal(0),
+            total: new Decimal(0),
+            unlockOrder: 0
+        }
+    },
+    color: "#dd2424",
+    requires() {return (player[this.layer].unlockOrder>0&&!hasAchievement('s', 25))?new Decimal("5e88"):new Decimal("1e75")}, // Can be a function that takes requirement increases into account
+    resource: "subscribers", // Name of prestige currency
+    baseResource: "fame", // Name of resource prestige is based on
+    baseAmount() { return player.f.points }, // Get the current amount of baseResource
+    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    exponent: 0.08, // Prestige currency exponent
+    gainMult() { // Calculate the multiplier for main currency from bonuses
+        mult = new Decimal(1)
+        if (hasAchievement('s', 21)) mult = mult.times(achievementEffect('s', 21))
+        return mult
+    },
+    gainExp() { // Calculate the exponent on main currency from bonuses
+        exp = new Decimal(1)
+        return exp
+    },
+    row: 2, // Row the layer is in on the tree (0 is the first row)
+    hotkeys: [
+        { key: "s", description: "S: Reset for subscribers.", onPress() { if (canReset(this.layer)) doReset(this.layer) }, unlocked() {return player.s.unlocked} },
+    ],
+    layerShown() { return hasAchievement ('a', 45) && !player.fo.unlocked || (player.fo.points.gte(100) || hasAchievement('a', 53))},
+    branches: ["k", "i"],
+    increaseUnlockOrder: ["fo"],
+    effect() {
+        let eff = new Decimal(1)
+        eff = eff.times(player.s.points)
+        eff = eff.add(1).pow(9).log(2).add(1)
+        return eff
+    },
+    effectDescription() {
+        let dis = "which multiplies 'Growth' effect before softcaps by <font color=#dd2424><h2>"+format(tmp.s.effect)+ "x</h2></font color=#dd2424> and after 1 softcap by <font color=#dd2424><h2>"+format(tmp.s.effect.div(4.5))+ "x</h2></font color=#dd2424>"
+        return dis
+    },
+    tabFormat: {
+        "Main": {
+            content: [
+                "main-display",
+                "prestige-button",
+                "blank",
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.s.best) + ' best subscribers.' },
+                    {}],
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.s.total) + ' total subscribers.' },
+                    {}],
+                "blank",
+                ["display-text",
+                        function () { return "You have<font color=dd2424><h2> "+format(tmp.s.buyables[31].cost)+ "</h2></font color=dd2424> Achievement Points, translating to a<font color=dd2424><h2> "+format(tmp.s.buyables[31].effect)+"x</h2></font color=dd2424> boost to popularity."},
+                        {}],
+                "blank",
+                "achievements",
+                "blank",
+                ["bar", "subscriberBar"]
+            ]
+        },
+        "Creation Team": {
+            content: [
+                "main-display",
+                "prestige-button",
+                "blank",
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.s.best) + ' best subscribers.' },
+                    {}],
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.s.total) + ' total subscribers.' },
+                    {}],
+                "blank",
+                "blank",
+                "blank"
+            ],
+            unlocked() {return false}
+        }
+    },
+
+    achievements: {
+        11: {
+            name: "1 Total<br>Subscriber",
+            tooltip: "Interactions x2. (only works if subscribers are first)",
+            done() {return player.s.total.gte(1)}
+        },
+        12: {
+            name: "2 Total Subscribers",
+            tooltip: "Keep all row 2 milestones on reset.",
+            done() {return player.s.total.gte(2)},
+            unlocked() {return hasAchievement('s', 11)},
+        },
+        13: {
+            name: "4 Total Subscribers",
+            tooltip: "Keep advertisements on reset (doesn't include bars).",
+            done() {return player.s.total.gte(4)},
+            unlocked() {return hasAchievement('s', 12)},
+        },
+        14: {
+            name: "6 Total Subscribers",
+            tooltip: "Keep fame upgrades on reset.",
+            done() {return player.s.total.gte(6)},
+            unlocked() {return hasAchievement('s', 13)}
+        },
+        15: {
+            name: "8 Total Subscribers",
+            tooltip: "Keep viewer buyables on reset.",
+            done() {return player.s.total.gte(8)},
+            unlocked() {return hasAchievement('s', 14)}
+        },
+        21: {
+            name: "10 Total Subscribers",
+            tooltip() {
+                let dis = "Popularity boosts subscribers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"
+                if (hasAchievement('s', 25)) dis = "Popularity boosts subscribers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"+"<br><br>This effect boosts popularity at 80 subscribers. Currently: "+format(achievementEffect('s', 21).times(10))+"x"
+                return dis
+            },
+            done() {return player.s.total.gte(10)},
+            unlocked() {return hasAchievement('s', 15)},
+            effect() {
+                let eff = player.points.add(1).pow(0.00465)
+                return eff
+            }
+        },
+        22: {
+            name: "15 Total Subscribers",
+            tooltip: "Keep interactions upgrades on reset.",
+            done() {return player.s.total.gte(15)},
+            unlocked() {return hasAchievement('s', 21)}
+        },
+        23: {
+            name: "24 Total Subscribers",
+            tooltip() {
+                let dis = "Subscribers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x"
+                if (hasAchievement('s', 25)) dis = "Subscribers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x<br><br>This effect's formula is improved at 65 subscribers."
+                return dis
+            },
+            done() {return player.s.total.gte(24)},
+            unlocked() {return hasAchievement('s', 22)},
+            effect() {
+                let eff = tmp.s.effect.pow(0.625)
+                if (player.s.points.gte(65)) eff = tmp.s.effect.add(1).pow(9).log(2).add(1)
+                return eff
+            }
+        },
+        24: {
+            name: "36 Total Subscribers",
+            tooltip: "Keep viewer and karma upgrades on reset. Neutral Karma generation cap is now 45,000.",
+            done() {return player.s.total.gte(36)},
+            unlocked() {return hasAchievement('s', 23)}
+        },
+        25: {
+            name: "50 Total Subscribers",
+            tooltip() {
+                let dis = "Subscribers act as if you chose them first & total achievement points are multiplied by subscribers. Currently: "+format(achievementEffect(this.layer,this.id))+"x"
+                return dis
+            },
+            done() {return player.s.total.gte(50)},
+            unlocked() {return hasAchievement('s', 24)},
+            effect() {
+                let eff = new Decimal(1)
+                eff = eff.times(player.s.points)
+                eff = eff.add(1).pow(0.1).log(2).add(1)
+                return eff
+            }
+        }
+    },
+
+    buyables: {
+        31: {
+            title: "achievement point lol",
+            display() {return "ap: "+format(tmp.s.buyables[31].cost)+"<br>eff: "+format(tmp.s.buyables[31].effect)},
+            cost() {
+                let cost = new Decimal(1)
+                cost = cost.times(player.s.achievements.length)
+                if (hasAchievement('s', 25)) cost = cost.times(achievementEffect('s', 25))
+                return cost
+            },
+            effect() {
+                let eff = tmp.s.buyables[31].cost
+                eff = eff.add(1).pow(27.28).log(2).add(1)
+                return eff
+            },
+            buy() {
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+                return player[this.layer].points.gte(this.cost())
+            },
+
+        }
+    },
+
+    bars: {
+        subscriberBar: {
+            direction: RIGHT,
+            width: 650,
+            height: 40,
+            fillStyle: { 'background-color': "#dd2424" },
+            borderStyle() { return { "border-color": "#dd2424" } },
+            progress() {
+                let prog = player.s.points.div(100)
+                if (player.s.points.gte(100)) prog = 1
+                return prog
+            },
+            display() {
+                if (player.s.points.lte(99))
+                    return "Unlock another layer: " + format(player.s.points) + "/100 subscribers."
+                else
+                    return "You have unlocked Followers."
+            },
+            unlocked() { return hasAchievement('s', 25)}
+        },
+    }
+})
+
 addLayer("a", {
     startData() {
         return {
@@ -1571,7 +2068,7 @@ addLayer("a", {
         },
         44: {
             name: "ULTIMATE RIZZ",
-            tooltip: "Have all the charisma upgrades.<br><br>Reward: Interactions start cost is now 1,000 fame. (only works when you have karma 44.)",
+            tooltip: "Have all the charisma upgrades.<br><br>Reward: Interactions start cost is now 1,000 fame. (only works when you have karma 44. & less than 3600 interactions.)",
             done() {
                 return hasUpgrade('k', 44)
             }
@@ -1581,6 +2078,27 @@ addLayer("a", {
             tooltip: "Have five rows of fame upgrades.",
             done() {
                 return hasUpgrade('f', 55)
+            }
+        },
+        51: {
+            name: "Social Media",
+            tooltip: "Have either followers or subscribers.<br><br>Reward: Viewers are 1.5x cheaper under 16 viewers.",
+            done() {
+                return player.fo.points.gte(1) || player.s.points.gte(1)
+            }
+        },
+        52: {
+            name: "'Antisocial Mexico' - Thenonymous",
+            tooltip: "Have both followers and subscribers.",
+            done() {
+                return player.fo.unlocked && player.s.unlocked
+            }
+        },
+        53: {
+            name: "Achievements Galore!",
+            tooltip: "Have the first two rows of follower and subscriber achievements.",
+            done() {
+                return hasAchievement('fo', 25) && hasAchievement('s', 25)
             }
         }
     },

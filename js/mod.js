@@ -13,11 +13,20 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.3.4",
-	name: "Fame Upgrades",
+	num: "0.4.0",
+	name: "FINALLY AN UPDATE",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h2>v0.4.0</h2><br>
+		- Added followers.<br>
+		- Added subscribers.<br>
+		- Added 10 follower achievements.<br>
+		- Added 10 subscriber achievements.<br>
+		- Added 3 achievements.<br>
+		- Added 2 bars.<br>
+		- Made a few balancing changes.<br>
+		- Fixed bugs.<br>
 	<h3>v0.3.4</h3><br>
 		- Added 5 upgrades.<br>
 		- Added 2 neutral karma upgrades.<br>
@@ -138,6 +147,10 @@ function getPointGen() {
 	if (hasUpgrade('k', 42)) gain = gain.times(upgradeEffect('k', 42))
 	if (hasUpgrade('k', 44)) gain = gain.times(upgradeEffect('k', 44))
 	if (hasUpgrade('k', 51)) gain = gain.times(tmp.v.buyables[12].effect)
+	if (player.fo.points.gte(80)) gain = gain.times(achievementEffect('fo', 21).times(10))
+	if (player.s.points.gte(80)) gain = gain.times(achievementEffect('s', 21).times(10))
+	if (player.fo.unlocked) gain = gain.times(tmp.fo.buyables[31].effect)
+	if (player.s.unlocked) gain = gain.times(tmp.s.buyables[31].effect)
 	if (player.v.unlocked) gain = gain.times(tmp.v.effect)
 	return gain
 }
@@ -148,7 +161,7 @@ function addedPlayerData() { return {
 
 // Display extra things at the top of the page
 var displayThings = [
-	`<h3><a>Endgame: 1e75 fame.</a></h3><br><small>the game is balanced up until this point,<br> going past it will risk hyperinflation<br> and you having to hard reset.<br><br>it is recommended to play without offline progress.</small>`
+	`<h3><a>Endgame: 1e100 fame.</a></h3><br><small>the game is balanced up until this point,<br> going past it will risk hyperinflation<br> and you having to hard reset.<br><br>it is recommended to play without offline progress.</small>`
 ]
 
 // Determines when the game "ends"

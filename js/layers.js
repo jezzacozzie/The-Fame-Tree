@@ -930,6 +930,7 @@ addLayer("i", {
                 return "Multiply interactions gain by 2 per buyable amount.<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
                     "<br>Cost: " + format(tmp.i.buyables[11].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[11].effect) + "x"
             },
+            purchaseLimit: new Decimal(5)
         },
         12: {
             title: "Billboards",
@@ -951,6 +952,7 @@ addLayer("i", {
                 return "Divide cost of Train Advertisements based on buyable amounts.<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
                     "<br>Cost: " + format(tmp.i.buyables[12].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[12].effect) + "x"
             },
+            purchaseLimit: new Decimal(5)
         },
         13: {
             title: "TV Broadcasts",
@@ -972,6 +974,7 @@ addLayer("i", {
                 return "Increase effect of Train Advertisements based on buyable amounts.<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
                     "<br>Cost: " + format(tmp.i.buyables[13].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[13].effect) + "x"
             },
+            purchaseLimit: new Decimal(5)
         },
     }
 

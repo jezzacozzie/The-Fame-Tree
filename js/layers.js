@@ -956,7 +956,7 @@ addLayer("i", {
         },
         13: {
             title: "TV Broadcasts",
-            unlocked() { return player.i.best.gte(750) },
+            unlocked() { return player.i.best.gte(750) && hasUpgrade('f', 42) },
             effect() { return getBuyableAmount(this.layer, this.id).times(1).pow_base(1.1); },
             cost() {
                 let cost = getBuyableAmount(this.layer, this.id).add(1).pow(2).times(750)

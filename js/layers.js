@@ -1526,6 +1526,8 @@ addLayer("fo", {
         "prestige-button": {
             "color" : "rgba(255, 255, 255, 0.75)",
         }}},
+    softcap: new Decimal(25),
+    softcapPower: new Decimal(0.25),
     
 
     tabFormat: {
@@ -1603,7 +1605,7 @@ addLayer("fo", {
             name: "10 Total Followers",
             tooltip() {
                 let dis = "Popularity boosts followers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"
-                if (hasAchievement('fo', 25)) dis = "Popularity boosts followers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"+"<br><br>This effect boosts popularity at 80 followers. Currently: "+format(achievementEffect('fo', 21).times(10))+"x"
+                if (hasAchievement('fo', 25)) dis = "Popularity boosts followers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"+"<br><br>This effect boosts popularity at 75 followers. Currently: "+format(achievementEffect('fo', 21).times(10))+"x"
                 return dis
             },
             done() {return player.fo.total.gte(10)},
@@ -1620,30 +1622,30 @@ addLayer("fo", {
             unlocked() {return hasAchievement('fo', 21)}
         },
         23: {
-            name: "24 Total Followers",
+            name: "22 Total Followers",
             tooltip() {
                 let dis = "Followers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x"
-                if (hasAchievement('fo', 25)) dis = "Followers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x<br><br>This effect's formula is improved at 65 followers."
+                if (hasAchievement('fo', 25)) dis = "Followers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x<br><br>This effect's formula is improved at 60 followers."
                 return dis
             },
-            done() {return player.fo.total.gte(24)},
+            done() {return player.fo.total.gte(22)},
             unlocked() {return hasAchievement('fo', 22)},
             effect() {
                 let eff = tmp.fo.effect.pow(0.625)
-                if (player.fo.points.gte(65)) eff = tmp.fo.effect.add(1).pow(9).log(2).add(1)
+                if (player.fo.points.gte(60)) eff = tmp.fo.effect.add(1).pow(9).log(2).add(1)
                 return eff
             }
         },
         24: {
-            name: "36 Total Followers",
+            name: "30 Total Followers",
             tooltip: "Keep viewer and karma upgrades on reset. Neutral Karma generation cap is now 45,000.",
-            done() {return player.fo.total.gte(36)},
+            done() {return player.fo.total.gte(30)},
             unlocked() {return hasAchievement('fo', 23)}
         },
         25: {
-            name: "50 Total Followers",
+            name: "40 Total Followers",
             tooltip() {return "Followers act as if you chose them first & total achievement points are multiplied by followers. Currently: "+format(achievementEffect(this.layer,this.id))+"x"},
-            done() {return player.fo.total.gte(50)},
+            done() {return player.fo.total.gte(40)},
             unlocked() {return hasAchievement('fo', 24)},
             effect() {
                 let eff = new Decimal(1)
@@ -1749,6 +1751,8 @@ addLayer("s", {
         let dis = "which multiplies 'Growth' effect before softcaps by <font color=#dd2424><h2>"+format(tmp.s.effect)+ "x</h2></font color=#dd2424> and after 1 softcap by <font color=#dd2424><h2>"+format(tmp.s.effect.div(4.5))+ "x</h2></font color=#dd2424>"
         return dis
     },
+    softcap: new Decimal(25),
+    softcapPower: new Decimal(0.25),
     tabFormat: {
         "Main": {
             content: [
@@ -1824,7 +1828,7 @@ addLayer("s", {
             name: "10 Total Subscribers",
             tooltip() {
                 let dis = "Popularity boosts subscribers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"
-                if (hasAchievement('s', 25)) dis = "Popularity boosts subscribers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"+"<br><br>This effect boosts popularity at 80 subscribers. Currently: "+format(achievementEffect('s', 21).times(10))+"x"
+                if (hasAchievement('s', 25)) dis = "Popularity boosts subscribers gain.<br>Currently: "+format(achievementEffect(this.layer,this.id))+"x"+"<br><br>This effect boosts popularity at 75 subscribers. Currently: "+format(achievementEffect('s', 21).times(10))+"x"
                 return dis
             },
             done() {return player.s.total.gte(10)},
@@ -1841,33 +1845,33 @@ addLayer("s", {
             unlocked() {return hasAchievement('s', 21)}
         },
         23: {
-            name: "24 Total Subscribers",
+            name: "22 Total Subscribers",
             tooltip() {
                 let dis = "Subscribers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x"
-                if (hasAchievement('s', 25)) dis = "Subscribers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x<br><br>This effect's formula is improved at 65 subscribers."
+                if (hasAchievement('s', 25)) dis = "Subscribers also provide a boost to fame. Currently: "+format(achievementEffect(this.layer,this.id))+"x<br><br>This effect's formula is improved at 60 subscribers."
                 return dis
             },
-            done() {return player.s.total.gte(24)},
+            done() {return player.s.total.gte(22)},
             unlocked() {return hasAchievement('s', 22)},
             effect() {
                 let eff = tmp.s.effect.pow(0.625)
-                if (player.s.points.gte(65)) eff = tmp.s.effect.add(1).pow(9).log(2).add(1)
+                if (player.s.points.gte(60)) eff = tmp.s.effect.add(1).pow(9).log(2).add(1)
                 return eff
             }
         },
         24: {
-            name: "36 Total Subscribers",
+            name: "30 Total Subscribers",
             tooltip: "Keep viewer and karma upgrades on reset. Neutral Karma generation cap is now 45,000.",
-            done() {return player.s.total.gte(36)},
+            done() {return player.s.total.gte(30)},
             unlocked() {return hasAchievement('s', 23)}
         },
         25: {
-            name: "50 Total Subscribers",
+            name: "40 Total Subscribers",
             tooltip() {
                 let dis = "Subscribers act as if you chose them first & total achievement points are multiplied by subscribers. Currently: "+format(achievementEffect(this.layer,this.id))+"x"
                 return dis
             },
-            done() {return player.s.total.gte(50)},
+            done() {return player.s.total.gte(40)},
             unlocked() {return hasAchievement('s', 24)},
             effect() {
                 let eff = new Decimal(1)

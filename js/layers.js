@@ -628,6 +628,7 @@ addLayer("i", {
     color: "#CF4FE1",
     requires() {
         let req = new Decimal(1e15)
+        if (hasMilestone('i', 1) && !hasAchievement('a', 44))
         if (hasAchievement ('a', 44) && hasUpgrade('k', 44) && player.i.points.lte(3600))  req = 1e3
         return req
         }, // Can be a function that takes requirement increases into account
@@ -671,7 +672,7 @@ addLayer("i", {
         return base
     },
     passiveGeneration() {
-        return hasMilestone('i', 1) ? 0.01:0
+        return hasMilestone('i', 2) ? 0.01:0
     },
     doReset(resettingLayer) {
         let keep = [];
@@ -696,6 +697,10 @@ addLayer("i", {
                     {}],
                 "blank",
                 "prestige-button",
+                "blank",
+                ["display-text",
+                    function () { if (hasAchievement('a', 44) && !hasMilestone('k', 4)) return '<small>This part of the game requires holding down the I key on your keyboard to gain interactions quicker. This part is very moblie unfriendly.</small>'},
+                    {}],
                 "blank",
                 "upgrades",
             ]
@@ -839,6 +844,11 @@ addLayer("i", {
             done() { return player.i.total.gte(3) }
         },
         1: {
+            requirementDescription: "100 Total Interactions",
+            effectDescription: "Interactions fame requirement becomes 1e12.",
+            done() {return player.i.total.gte(100)}
+        },
+        2: {
             requirementDescription: "300 Total Interactions",
             effectDescription: "Gain 1% of interactions gain per second.",
             done() { return player.i.total.gte(300) }
@@ -916,6 +926,7 @@ addLayer("i", {
             cost() {
                 let cost = getBuyableAmount(this.layer, this.id).add(1).pow(2).times(10)
                 if (getBuyableAmount(this.layer, this.id).gte(2)) cost = cost.pow(2)
+                if (getBuyableAmount(this.layer, this.id).equals(2)) cost = cost.div(1.2)
                 if (getBuyableAmount('i', 12).gte(1)) cost = cost.div(tmp.i.buyables[12].effect)
                 return cost
             },
@@ -961,6 +972,7 @@ addLayer("i", {
             cost() {
                 let cost = getBuyableAmount(this.layer, this.id).add(1).pow(2).times(750)
                 if (getBuyableAmount(this.layer, this.id).gte(2)) cost = cost.pow(1.5)
+                if (getBuyableAmount(this.layer, this.id).equals(1)) cost = cost.div(1.2)
                 return cost
             },
             buy() {
@@ -1835,6 +1847,7 @@ addLayer("s", {
             unlocked() {return hasAchievement('s', 15)},
             effect() {
                 let eff = player.points.add(1).pow(0.00465)
+                if (player.s.points.gte(100)) eff = player.points.add(1).pow(0.0045)
                 return eff
             }
         },

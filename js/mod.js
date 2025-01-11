@@ -13,15 +13,20 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.4.1",
-	name: "Bugfixes",
+	num: "0.4.2",
+	name: "The Internet",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3>v0.4.2</h3><br>
+		- Added 2 bars.<br>
+		- Added The Internet.<br>
+		- Added 2 achievements.<br>
+		- Fixed an interaction milestone 1 bug.<br>
 	<h3>v0.4.1</h3><br>
 		- Added 1 interaction milestone.<br>
 		- Lowered some advertisement costs.<br>
-		- Nerfed some achievement req's for row 3.<br>
+		- Nerfed some achievement reqs for row 3.<br>
 		- Added a softcap for row 3 currencies.<br>
 		- You now need fame 42 for advertisement 3.<br>
 		- Added a cap to the advertisements.<br>

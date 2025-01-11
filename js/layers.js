@@ -398,6 +398,9 @@ addLayer("v", {
         if (hasAchievement('s', 24) && resettingLayer == "s") keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
     },
+    resetsNothing() {
+        if (hasMilestone('v', 4)) return true
+    },
 
     tabFormat: {
         "Main": {
@@ -556,6 +559,14 @@ addLayer("v", {
             },
             effectDescription: "You can buy max viewers."
         },
+        4: {
+            requirementDescription: "44 Viewers",
+            done() {
+                return player.v.best.gte(44)
+            },
+            effectDescription: "Viewers no longer reset fame.",
+            unlocked() {return hasMilestone('fo', 0)}
+        },
     },
 
     buyables: {
@@ -622,13 +633,12 @@ addLayer("i", {
             unlocked: false,
             points: new Decimal(0),
             best: new Decimal(0),
-            total: new Decimal(0),
         }
     },
     color: "#CF4FE1",
     requires() {
         let req = new Decimal(1e15)
-        if (hasMilestone('i', 1) && !hasAchievement('a', 44))
+        if (hasMilestone('i', 1) && !hasAchievement('a', 44)) req = 1e12
         if (hasAchievement ('a', 44) && hasUpgrade('k', 44) && player.i.points.lte(3600))  req = 1e3
         return req
         }, // Can be a function that takes requirement increases into account
@@ -643,6 +653,7 @@ addLayer("i", {
         mult = mult.times(tmp.i.buyables[11].effect)
         if (hasAchievement('fo', 11) && player.fo.unlockOrder<=0) mult = mult.times(2)
         if (hasAchievement('s', 11) && player.s.unlockOrder<=0) mult = mult.times(2)
+        if (hasAchievement('a', 55) && player.i.points.lte(12000)) mult = mult.times(3)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -672,7 +683,7 @@ addLayer("i", {
         return base
     },
     passiveGeneration() {
-        return hasMilestone('i', 2) ? 0.01:0
+        return (hasMilestone('i', 3)) ? ((getBuyableAmount('i', 21)).add(getBuyableAmount('i', 22)).add(getBuyableAmount('i', 23)).add(getBuyableAmount('i', 24)).add(getBuyableAmount('i', 25)).div(100)): (hasMilestone('i', 2) && !(hasMilestone('i', 3))) ? 0.01:0
     },
     doReset(resettingLayer) {
         let keep = [];
@@ -684,6 +695,8 @@ addLayer("i", {
         if (hasAchievement('s', 22) && resettingLayer == "s") keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
     },
+    canReset() {if (player.i.points.gte(12000)) return false
+    else return true},
 
     tabFormat: {
         "Main": {
@@ -701,6 +714,9 @@ addLayer("i", {
                 ["display-text",
                     function () { if (hasAchievement('a', 44) && !hasMilestone('k', 4)) return '<small>This part of the game requires holding down the I key on your keyboard to gain interactions quicker. This part is very moblie unfriendly.</small>'},
                     {}],
+                ["display-text",
+                    function () { if (player.i.points.gte(7500) && player.fo.best.gte(250)) return '<small>You can no longer reset to gain interactions after 12000 interactions.</small>'},
+                    {}],
                 "blank",
                 "upgrades",
             ]
@@ -717,6 +733,10 @@ addLayer("i", {
                 "blank",
                 "prestige-button",
                 "blank",
+                ["display-text",
+                    function () { if (player.i.points.gte(7500) && player.fo.best.gte(250)) return '<small>You can no longer reset to gain interactions after 12000 interactions.</small>'},
+                {   }],
+                "blank",
                 "milestones",
             ]
         },
@@ -732,14 +752,41 @@ addLayer("i", {
                 "blank",
                 "prestige-button",
                 "blank",
+                ["display-text",
+                    function () { if (player.i.points.gte(7500) && player.fo.best.gte(250)) return '<small>You can no longer reset to gain interactions after 12000 interactions.</small>'},
+                    {}],
+                "blank",
                 ["bar", "bigBar"],
                 "blank",
                 ["bar", 'biggerBar'],
                 "blank",
                 ["bar", 'biggestBar'],
                 "blank",
-                "buyables",
+                ["buyables", [1]],
             ]
+        },
+        "The Internet": {
+            content: [
+                "main-display",
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.i.best) + ' best interactions.' },
+                    {}],
+                ["display-text",
+                    function () { return 'You have ' + formatWhole(player.i.total) + ' total interactions.' },
+                    {}],
+                "blank",
+                "prestige-button",
+                "blank",
+                ["display-text",
+                    function () { return '<small>People have grown strong opinions about you! You can use this to your advantage to generate more interactions per second.</small>' },
+                    {}],
+                "blank",
+                ["bar", "cancellationbarscaredemojicluelessemojiquippyscreamemoji"],
+                "blank",
+                ["buyables", [2]]
+            ],
+            unlocked() {if (hasMilestone('fo', 1) && hasMilestone('i', 3)) return true
+        else return false},
         }
     },
 
@@ -853,6 +900,12 @@ addLayer("i", {
             effectDescription: "Gain 1% of interactions gain per second.",
             done() { return player.i.total.gte(300) }
         },
+        3: {
+            requirementDescription: "12,000 Interactions",
+            effectDescription: "Unlock 'The Internet'.",
+            done() {return player.i.points.gte(12000)},
+            unlocked() {return hasMilestone('fo', 1)}
+        }
     },
 
     bars: {
@@ -912,15 +965,39 @@ addLayer("i", {
             },
             unlocked() { return hasUpgrade('f', 42)}
         },
+        cancellationbarscaredemojicluelessemojiquippyscreamemoji: {
+            direction: RIGHT,
+            width: 650,
+            height: 40,
+            fillStyle: { 'background-color': "#cf4fe1" },
+            borderStyle() { return { "border-color": "#cf4fe1" } },
+            progress() {
+                let prog = getBuyableAmount('i', 21).add(getBuyableAmount('i', 22)).add(getBuyableAmount('i', 23)).add(getBuyableAmount('i', 24)).add(getBuyableAmount('i', 25)).div(100)
+                return prog
+            },
+            display() {
+                if (getBuyableAmount('i', 21).add(getBuyableAmount('i', 22)).add(getBuyableAmount('i', 23)).add(getBuyableAmount('i', 24)).add(getBuyableAmount('i', 25)).lte(99))
+                    return "Your cancellation fuels you to: " + format(getBuyableAmount('i', 21).add(getBuyableAmount('i', 22)).add(getBuyableAmount('i', 23)).add(getBuyableAmount('i', 24)).add(getBuyableAmount('i', 25))) + "% interactions per second."
+                else
+                    return "They should've listened."
+            },
+            unlocked() { return hasMilestone('i', 3)}
+        }
     },
 
     buyables: {
         11: {
             title: "Train Advertisements",
             unlocked() { return player.i.best.gte(10) },
+            base() {
+                let base = new Decimal(1).pow_base(2)
+                if (getBuyableAmount('i', 13).gte(1)) base = base.times(tmp.i.buyables[13].effect)
+                return base
+            },
             effect() { 
-                let eff = getBuyableAmount(this.layer, this.id).times(1).pow_base(2)
+                let eff = new Decimal(1).pow_base(2)
                 if (getBuyableAmount('i', 13).gte(1)) eff = eff.times(tmp.i.buyables[13].effect)
+                eff = eff.pow(getBuyableAmount(this.layer, this.id))
                 return eff
              },
             cost() {
@@ -938,10 +1015,10 @@ addLayer("i", {
                 return player[this.layer].points.gte(this.cost())
             },
             display() {
-                return "Multiply interactions gain by 2 per buyable amount.<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
-                    "<br>Cost: " + format(tmp.i.buyables[11].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[11].effect) + "x"
+                return "Multiply interactions gain by " +format(tmp.i.buyables[11].base) + "x per buyable amount.<br>Amount: " + formatWhole(getBuyableAmount(this.layer, this.id)) +
+                    "/4<br>Cost: " + format(tmp.i.buyables[11].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[11].effect) + "x"
             },
-            purchaseLimit: new Decimal(5)
+            purchaseLimit: new Decimal(4)
         },
         12: {
             title: "Billboards",
@@ -960,10 +1037,10 @@ addLayer("i", {
                 return player[this.layer].points.gte(this.cost())
             },
             display() {
-                return "Divide cost of Train Advertisements based on buyable amounts.<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
-                    "<br>Cost: " + format(tmp.i.buyables[12].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[12].effect) + "x"
+                return "Divide cost of Train Advertisements based on buyable amounts.<br>Amount: " + formatWhole(getBuyableAmount(this.layer, this.id)) +
+                    "/2<br>Cost: " + format(tmp.i.buyables[12].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[12].effect) + "x"
             },
-            purchaseLimit: new Decimal(5)
+            purchaseLimit: new Decimal(2)
         },
         13: {
             title: "TV Broadcasts",
@@ -983,14 +1060,129 @@ addLayer("i", {
                 return player[this.layer].points.gte(this.cost())
             },
             display() {
-                return "Increase effect of Train Advertisements based on buyable amounts.<br>Amount: " + format(getBuyableAmount(this.layer, this.id)) +
-                    "<br>Cost: " + format(tmp.i.buyables[13].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[13].effect) + "x"
+                return "Increase effect of Train Advertisements based on buyable amounts.<br>Amount: " + formatWhole(getBuyableAmount(this.layer, this.id)) +
+                    "/2<br>Cost: " + format(tmp.i.buyables[13].cost) + " interactions.<br>Effect: " + format(tmp.i.buyables[13].effect) + "x"
             },
-            purchaseLimit: new Decimal(5)
+            purchaseLimit: new Decimal(2)
         },
-    }
-
-})
+        21: {
+            title: "Fuel your cancellation!",
+            effect() {return getBuyableAmount(this.layer, this.id)},
+            cost() {let cost = new Decimal(1)
+                    cost = cost.times(10).pow(getBuyableAmount(this.layer, this.id))
+                    cost = cost.times(1e100)
+                    return cost},
+            buy() {
+                player.f.points = player.f.points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+                return player.f.points.gte(this.cost())
+            },
+            display() {
+                return "Amount: " + formatWhole(getBuyableAmount(this.layer, this.id)) +
+                    "/20<br>Cost: " + format(tmp.i.buyables[21].cost) + " <font color=F5E907><h2>fame</h2></font color=F5E907>."
+            },
+            purchaseLimit: new Decimal(20),
+            style: {
+                "height": "130px",
+                "width": "130px",
+            }
+    },
+        22: {
+            title: "Fuel your cancellation!",
+            effect() {return getBuyableAmount(this.layer, this.id)},
+            cost() {let cost = new Decimal(44)
+                cost = cost.add(getBuyableAmount(this.layer, this.id))
+                return cost},
+            buy() {
+            player.v.points = player.v.points.sub(this.cost())
+            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+            return player.v.points.gte(this.cost())
+            },
+            display() {
+            return "Amount: " + formatWhole(getBuyableAmount(this.layer, this.id)) +
+                "/20<br>Cost: " + format(tmp.i.buyables[22].cost) + " <font color=5440C4><h2>viewers</h2</font color=5440C4>."
+            },
+            purchaseLimit: new Decimal(20),
+            style: {
+                "height": "130px",
+                "width": "130px",
+            }
+    },      
+        23: {
+            title: "Fuel your cancellation!",
+            effect() {return getBuyableAmount(this.layer, this.id)},
+            cost() {let cost = new Decimal(2)
+                cost = cost.pow_base((getBuyableAmount(this.layer, this.id)).add(1))
+                cost = cost.times(1e6)
+                return cost},
+            buy() {
+            player.k.points = player.k.points.sub(this.cost())
+            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+            return player.k.points.gte(this.cost())
+            },
+            display() {
+            return "Amount: " + formatWhole(getBuyableAmount(this.layer, this.id)) +
+                "/20<br>Cost: " + format(tmp.i.buyables[23].cost) + " <font color=6E7570><h2>karma</h2></font color=6E7570>."
+            },
+            purchaseLimit: new Decimal(20),
+            style: {
+                "height": "130px",
+                "width": "130px",
+            }
+    },
+        24: {
+            title: "Fuel your cancellation!",
+            effect() {return getBuyableAmount(this.layer, this.id)},
+            cost() {let cost = new Decimal(50).times((getBuyableAmount(this.layer, this.id).add(1)))
+                cost = cost.add(200)
+                return cost},
+            buy() {
+            player.fo.points = player.fo.points.sub(this.cost())
+            setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            canAfford() {
+            return player.fo.points.gte(this.cost())
+            },
+            display() {
+            return "Amount: " + formatWhole(getBuyableAmount(this.layer, this.id)) +
+                "/20<br>Cost: " + format(tmp.i.buyables[24].cost) + " <font color=162C7D><h2>followers</h2></font color=162C7D>."
+            },
+            purchaseLimit: new Decimal(20),
+            style: {
+                "height": "130px",
+                "width": "130px",
+            }
+    },
+    25: {
+        title: "Fuel your cancellation!",
+        effect() {return getBuyableAmount(this.layer, this.id)},
+        cost() {let cost = new Decimal(50).times((getBuyableAmount(this.layer, this.id).add(1)))
+            cost = cost.add(200)
+            return cost},
+        buy() {
+        player.s.points = player.s.points.sub(this.cost())
+        setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+        },
+        canAfford() {
+        return player.s.points.gte(this.cost())
+        },
+        display() {
+        return "Amount: " + formatWhole(getBuyableAmount(this.layer, this.id)) +
+            "/20<br>Cost: " + format(tmp.i.buyables[25].cost) + " <font color=#dd2424><h2>subscribers</h2></font color=#dd2424>."
+        },
+        purchaseLimit: new Decimal(20),
+        style: {
+            "height": "130px",
+            "width": "130px",
+        }
+},
+}})
 
 addLayer("k", {
     name: "karma", // This is optional, only used in a few places, If absent it just uses the layer id.
@@ -1032,7 +1224,7 @@ addLayer("k", {
     branches: ["f"],
     effectDescription() {return "which can be assigned to different karma types."},
     automate() {if (hasMilestone('k', 2)) buyBuyable('k', 11), buyBuyable('k', 12), buyBuyable('k', 21), buyBuyable('k', 22)},
-    passiveGeneration() {return (hasAchievement('fo', 24) || hasAchievement('s', 24)) && player.k.points.lte(45000) && hasMilestone('k', 3) ? 0.25: hasMilestone('k', 3) && player.k.points.lte(9975) ? 0.25: hasMilestone('k', 3) && player.k.points.lte(10000) ? 0.01:0},
+    passiveGeneration() {return (hasMilestone('s', 0)) && (player.k.points.lte(tmp.k.kCap)) ? 1: (hasAchievement('fo', 24) || hasAchievement('s', 24)) && player.k.points.lte(45000) && hasMilestone('k', 3) ? 0.25: hasMilestone('k', 3) && player.k.points.lte(9975) ? 0.25: hasMilestone('k', 3) && player.k.points.lte(10000) ? 0.01:0},
     doReset(resettingLayer) {
         let keep = [];
         if (hasAchievement('fo', 12) && resettingLayer == "fo") keep.push("milestones")
@@ -1040,6 +1232,11 @@ addLayer("k", {
         if (hasAchievement('s', 12) && resettingLayer == "s") keep.push("milestones")
         if (hasAchievement('s', 24) && resettingLayer == "s") keep.push("upgrades")
         if (layers[resettingLayer].row > this.row) layerDataReset(this.layer, keep)
+    },
+    kCap() {
+        let kcap = new Decimal(45000)
+        if (hasMilestone('s', 1)) kcap = kcap.add(((player.s.points.add(1)).times(1000)).pow(0.75))
+        return kcap
     },
 
     tabFormat: {
@@ -1540,7 +1737,12 @@ addLayer("fo", {
         }}},
     softcap: new Decimal(25),
     softcapPower: new Decimal(0.25),
-    
+    progFOValue() {
+        let prog = new Decimal(175)
+        if (hasMilestone('fo', 0)) prog = new Decimal(250)
+        if (hasMilestone('fo', 1)) prog = new Decimal(600)
+        return prog
+    },
 
     tabFormat: {
             "Main": {
@@ -1561,7 +1763,8 @@ addLayer("fo", {
                     "blank",
                     "achievements",
                     "blank",
-                    ["bar" , "followerBar"]
+                    ["bar" , "followerBar"],
+                    ["bar" , "unlockFOBar"]
                 ]
             },
             "Short Videos": {
@@ -1587,28 +1790,28 @@ addLayer("fo", {
         11: {
             name: "1 Total<br>Follower",
             tooltip: "Interactions x2. (only works if followers are first)",
-            done() {return player.fo.total.gte(1)}
+            done() {return player.fo.total.gte(1)},
         },
         12: {
-            name: "2 Total Followers",
+            name: "2 Total<br>Followers",
             tooltip: "Keep all row 2 milestones on reset.",
             done() {return player.fo.total.gte(2)},
             unlocked() {return hasAchievement('fo', 11)},
         },
         13: {
-            name: "3 Total Followers",
+            name: "3 Total<br>Followers",
             tooltip: "Keep advertisements on reset (doesn't include bars).",
             done() {return player.fo.total.gte(3)},
             unlocked() {return hasAchievement('fo', 12)},
         },
         14: {
-            name: "5 Total Followers",
+            name: "5 Total<br>Followers",
             tooltip: "Keep fame upgrades on reset.",
             done() {return player.fo.total.gte(5)},
             unlocked() {return hasAchievement('fo', 13)}
         },
         15: {
-            name: "7 Total Followers",
+            name: "7 Total<br>Followers",
             tooltip: "Keep viewer buyables on reset.",
             done() {return player.fo.total.gte(7)},
             unlocked() {return hasAchievement('fo', 14)}
@@ -1668,6 +1871,17 @@ addLayer("fo", {
         }
     },
 
+    milestones: {
+        0: {
+            requirementDescription: "175 Followers: Unlock a viewer milestone.",
+            done() {return player.fo.points.gte(175)},
+        },
+        1: {
+            requirementDescription: "250 Followers: Unlock an interactions milestone.",
+            done() {return player.fo.points.gte(250)},
+        },
+    },
+
     buyables: {
         31: {
             title: "achievement point lol",
@@ -1708,11 +1922,30 @@ addLayer("fo", {
             },
             display() {
                 if (player.fo.points.lte(99))
-                    return "Unlock another layer: " + format(player.fo.points) + "/100 followers."
+                    return "Unlock another layer: " + formatWhole(player.fo.points) + " / 100 followers."
                 else
                     return "You have unlocked Subscribers."
             },
-            unlocked() { return hasAchievement('fo', 25)}
+            unlocked() { return hasAchievement('fo', 25) && !hasAchievement('a', 54)}
+        },
+        unlockFOBar: {
+            direction: RIGHT,
+            width: 650,
+            height: 40,
+            fillStyle: { 'background-color': "#162C7D" },
+            borderStyle() { return { "border-color": "#162C7D" } },
+            progress() {
+                let prog = player.fo.points.div(tmp.fo.progFOValue)
+                if (hasMilestone('s', 1)) prog = 1
+                return prog
+            },
+            display() {
+                if (!hasMilestone('fo', 1))
+                    return "Unlock more content: " + formatWhole(player.fo.points) + " / "+formatWhole(tmp.fo.progFOValue)+" followers."
+                else
+                    return "More content is on its way in a future update!"
+            },
+            unlocked() { return hasAchievement('a', 54)}
         },
     }
 })
@@ -1765,6 +1998,12 @@ addLayer("s", {
     },
     softcap: new Decimal(25),
     softcapPower: new Decimal(0.25),
+    progValue() {
+        let prog = new Decimal(175)
+        if (hasMilestone('s', 0)) prog = new Decimal(250)
+        if (hasMilestone('s', 1)) prog = new Decimal(600)
+        return prog
+    },
     tabFormat: {
         "Main": {
             content: [
@@ -1784,7 +2023,8 @@ addLayer("s", {
                 "blank",
                 "achievements",
                 "blank",
-                ["bar", "subscriberBar"]
+                ["bar", "subscriberBar"],
+                ["bar", "unlockSBar"]
             ]
         },
         "Creation Team": {
@@ -1895,6 +2135,17 @@ addLayer("s", {
         }
     },
 
+    milestones: {
+      0: {
+        requirementDescription: "175 Subscribers: Karma generation is now 100%.",
+        done() {return player.s.points.gte(175)},
+      }, 
+      1: {
+        requirementDescription: "250 Subscribers: Add to karma generation cap based on subscribers.",
+        done() {return player.s.points.gte(250)}
+      }
+    },
+
     buyables: {
         31: {
             title: "achievement point lol",
@@ -1935,11 +2186,30 @@ addLayer("s", {
             },
             display() {
                 if (player.s.points.lte(99))
-                    return "Unlock another layer: " + format(player.s.points) + "/100 subscribers."
+                    return "Unlock another layer: " + formatWhole(player.s.points) + " / 100 subscribers."
                 else
                     return "You have unlocked Followers."
             },
-            unlocked() { return hasAchievement('s', 25)}
+            unlocked() { return hasAchievement('s', 25) && !hasAchievement('a', 54)}
+        },
+        unlockSBar: {
+            direction: RIGHT,
+            width: 650,
+            height: 40,
+            fillStyle: { 'background-color': "#dd2424" },
+            borderStyle() { return { "border-color": "#dd2424" } },
+            progress() {
+                let prog = player.s.points.div(tmp.s.progValue)
+                if (hasMilestone('s', 1)) prog = 1
+                return prog
+            },
+            display() {
+                if (!hasMilestone('s', 1))
+                    return "Unlock more content: " + formatWhole(player.s.points) + " / "+formatWhole(tmp.s.progValue)+" subscribers."
+                else
+                    return "More content is on its way in a future update!"
+            },
+            unlocked() { return hasAchievement('a', 54)}
         },
     }
 })
@@ -2120,7 +2390,21 @@ addLayer("a", {
             done() {
                 return hasAchievement('fo', 25) && hasAchievement('s', 25)
             }
-        }
+        },
+        54: {
+            name: "The New MrBeast",
+            tooltip: "Have 100 followers and subscribers.<br><br>Reward: Repurpose the row 3 bars.",
+            done() {
+                return player.fo.points.gte(100) && player.s.points.gte(100)
+            }
+        },
+        55: {
+            name: "What do you mean no more fame upgrades?",
+            tooltip: "Unlock 'The Internet'<br><br>Reward: Interactions gain below 12,000 is x3.",
+            done() {
+                return hasMilestone('i', 3)
+            }
+        },
     },
 },
 )

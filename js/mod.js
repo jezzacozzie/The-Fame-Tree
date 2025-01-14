@@ -21,6 +21,8 @@ let changelog = `<h1>Changelog:</h1><br>
 	<h3>v0.4.2</h3><br>
 		- Added 2 bars.<br>
 		- Added The Internet.<br>
+		- Added a viewer milestone.<br>
+		- Added an interactions milestone.<br>
 		- Added 2 achievements.<br>
 		- Fixed an interaction milestone 1 bug.<br>
 	<h3>v0.4.1</h3><br>

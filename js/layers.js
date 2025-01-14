@@ -639,6 +639,7 @@ addLayer("i", {
     requires() {
         let req = new Decimal(1e15)
         if (hasMilestone('i', 1) && !hasAchievement('a', 44)) req = 1e12
+        if (hasMilestone('i', 2) && !hasAchievement('a', 44)) req = 1e9
         if (hasAchievement ('a', 44) && hasUpgrade('k', 44) && player.i.points.lte(3600))  req = 1e3
         return req
         }, // Can be a function that takes requirement increases into account
@@ -683,7 +684,7 @@ addLayer("i", {
         return base
     },
     passiveGeneration() {
-        return (hasMilestone('i', 3)) ? ((getBuyableAmount('i', 21)).add(getBuyableAmount('i', 22)).add(getBuyableAmount('i', 23)).add(getBuyableAmount('i', 24)).add(getBuyableAmount('i', 25)).div(100)): (hasMilestone('i', 2) && !(hasMilestone('i', 3))) ? 0.01:0
+        return (hasMilestone('i', 3)) ? ((getBuyableAmount('i', 21)).add(getBuyableAmount('i', 22)).add(getBuyableAmount('i', 23)).add(getBuyableAmount('i', 24)).add(getBuyableAmount('i', 25)).div(100)):0
     },
     doReset(resettingLayer) {
         let keep = [];
@@ -715,7 +716,7 @@ addLayer("i", {
                     function () { if (hasAchievement('a', 44) && !hasMilestone('k', 4)) return '<small>This part of the game requires holding down the I key on your keyboard to gain interactions quicker. This part is very moblie unfriendly.</small>'},
                     {}],
                 ["display-text",
-                    function () { if (player.i.points.gte(7500) && player.fo.best.gte(250)) return '<small>You can no longer reset to gain interactions after 12000 interactions.</small>'},
+                    function () { if (player.i.points.gte(7500) && player.fo.best.gte(250) && !hasAchievement('a', 55)) return '<small>You can no longer reset to gain interactions after 12000 interactions.</small>'},
                     {}],
                 "blank",
                 "upgrades",
@@ -734,7 +735,7 @@ addLayer("i", {
                 "prestige-button",
                 "blank",
                 ["display-text",
-                    function () { if (player.i.points.gte(7500) && player.fo.best.gte(250)) return '<small>You can no longer reset to gain interactions after 12000 interactions.</small>'},
+                    function () { if (player.i.points.gte(7500) && player.fo.best.gte(250) && !hasAchievement('a', 55)) return '<small>You can no longer reset to gain interactions after 12000 interactions.</small>'},
                 {   }],
                 "blank",
                 "milestones",
@@ -753,7 +754,7 @@ addLayer("i", {
                 "prestige-button",
                 "blank",
                 ["display-text",
-                    function () { if (player.i.points.gte(7500) && player.fo.best.gte(250)) return '<small>You can no longer reset to gain interactions after 12000 interactions.</small>'},
+                    function () { if (player.i.points.gte(7500) && player.fo.best.gte(250) && !hasAchievement('a', 55)) return '<small>You can no longer reset to gain interactions after 12000 interactions.</small>'},
                     {}],
                 "blank",
                 ["bar", "bigBar"],
@@ -897,7 +898,7 @@ addLayer("i", {
         },
         2: {
             requirementDescription: "300 Total Interactions",
-            effectDescription: "Gain 1% of interactions gain per second.",
+            effectDescription: "Interactions fame requirement becomes 1e9.",
             done() { return player.i.total.gte(300) }
         },
         3: {
